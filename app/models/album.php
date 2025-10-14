@@ -21,13 +21,17 @@ class Album{
     public function crearAlbum($titulo,$esPublico,$urlPortada,$idUsuario){
         $conexion = abrirConexion();
 
+        $titulo = mysqli_real_escape_string($conexion, $titulo); //hace que no se rompa la consulta sql si meten algun caracter especial
+        $urlPortada = mysqli_real_escape_string($conexion, $urlPortada);
+        $idUsuario = (int)$idUsuario;
+
         $consulta = "INSERT INTO album (tituloAlbum, esPublicoAlbum, urlPortadaAlbum, idUsuarioAlbum) VALUES ('$titulo', $esPublico, '$urlPortada', $idUsuario)";
 
         $resultado = mysqli_query($conexion,$consulta);
 
         cerrarConexion($conexion);
 
-        return $resultado ? true : false;
+        return $resultado ? true : false; //si pudo crear el album retorna true
     }
 
     public function mostrarTodos(){
@@ -66,7 +70,7 @@ class Album{
             }
             cerrarConexion($conexion);
             return $albumes;
-            
+
         }else{ //si no tiene albumes retorna falso
             cerrarConexion($conexion);
             return false;
