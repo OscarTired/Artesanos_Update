@@ -37,7 +37,7 @@ class Album{
     public function mostrarTodos(){
         $conexion = abrirConexion();
 
-        $consulta = "SELECT * FROM album ORDER BY idAlbum DESC";
+        $consulta = "SELECT a.idAlbum, a.tituloAlbum, a.urlPortadaAlbum, a.esPublicoAlbum, u.nombreUsuario, u.apellidoUsuario, u.arrobaUsuario FROM album a JOIN usuario u ON a.idUsuarioAlbum = u.idUsuario ORDER BY a.idAlbum DESC";
         $resultado = mysqli_query($conexion,$consulta);
 
         $albumes = [];

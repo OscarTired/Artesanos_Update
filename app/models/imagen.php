@@ -9,7 +9,7 @@ class Imagen{
         $this->titulo = "";
         $this->descripcion = "";
         $this->etiqueta= "";
-        $this->enRevision = 0;
+        $this->enRevision = 0; 
         $this->url = "";
         $this->idAlbum = 0;
     }
