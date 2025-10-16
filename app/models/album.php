@@ -1,16 +1,22 @@
 <?php
-require '../../config/conexion.php';
-require '../../config/cerrarConexion.php';
+
+// Clase entidad: representa un álbum como objeto.
+// No accede directamente a la base de datos, solo modela los datos.
 
 class Album{
-    private $idAlbum, $tituloAlbum, $esPublico, $urlPortada, $idUsuario;
-    public function __construct(){
-        $this->idAlbum = 0;
-        $this->tituloAlbum = "";
-        $this->esPublico = 0;
-        $this->urlPortada = "";
-        $this->idUsuario = 0;
+    private $idAlbum, $tituloAlbum, $esPublico, $urlPortada, $idUsuario, $apodoUsuario, $arrobaUsuario;
+    public function __construct($tituloAlbum, $esPublico, $urlPortada, $idUsuario){
+        
+        $this->tituloAlbum = $tituloAlbum;
+        $this->esPublico = $esPublico;
+        $this->urlPortada = $urlPortada;
+        $this->idUsuario = (int)$idUsuario;
     }
+    public function setUsuario($apodo, $arroba){
+        $this->apodoUsuario = $apodo;
+        $this->arrobaUsuario = $arroba;
+    }
+
     public function __get($variable){
         return $this->$variable;
     }
@@ -18,64 +24,6 @@ class Album{
         $this->$variable = $valor;
     }
 
-    public function crearAlbum($titulo,$esPublico,$urlPortada,$idUsuario){
-        $conexion = abrirConexion();
-
-        $titulo = mysqli_real_escape_string($conexion, $titulo); //hace que no se rompa la consulta sql si meten algun caracter especial
-        $urlPortada = mysqli_real_escape_string($conexion, $urlPortada);
-        $idUsuario = (int)$idUsuario;
-
-        $consulta = "INSERT INTO album (tituloAlbum, esPublicoAlbum, urlPortadaAlbum, idUsuarioAlbum) VALUES ('$titulo', $esPublico, '$urlPortada', $idUsuario)";
-
-        $resultado = mysqli_query($conexion,$consulta);
-
-        cerrarConexion($conexion);
-
-        return $resultado ? true : false; //si pudo crear el album retorna true
-    }
-
-    public function mostrarTodos(){
-        $conexion = abrirConexion();
-
-        $consulta = "SELECT a.idAlbum, a.tituloAlbum, a.urlPortadaAlbum, a.esPublicoAlbum, u.nombreUsuario, u.apellidoUsuario, u.arrobaUsuario FROM album a JOIN usuario u ON a.idUsuarioAlbum = u.idUsuario ORDER BY a.idAlbum DESC";
-        $resultado = mysqli_query($conexion,$consulta);
-
-        $albumes = [];
-        $nfilas = mysqli_num_rows($resultado);
-        if($nfilas > 0){
-            for($i=0; $i < $nfilas; $i++){
-                $fila = mysqli_fetch_array($resultado);
-                $albumes[] = $fila;
-            }
-            cerrarConexion($conexion);
-            return $albumes;
-        }else{ //si no hay albumes creados retorna falso
-            cerrarConexion($conexion);
-            return false;
-        }
-    }
-
-    public function mostrarPorUsuario($idUs){
-        $conexion = abrirConexion();
-
-        $consulta = "SELECT * FROM album WHERE idUsuarioAlbum = $idUs ORDER BY idAlbum DESC";
-        $resultado = mysqli_query($conexion,$consulta);
-
-        $albumes = [];
-        $nfilas = mysqli_num_rows($resultado);
-        if($nfilas > 0){
-            for($i=0; $i < $nfilas; $i++){
-                $fila = mysqli_fetch_array($resultado);
-                $albumes[] = $fila;
-            }
-            cerrarConexion($conexion);
-            return $albumes;
-
-        }else{ //si no tiene albumes retorna falso
-            cerrarConexion($conexion);
-            return false;
-        }
-    }
 }
 
 

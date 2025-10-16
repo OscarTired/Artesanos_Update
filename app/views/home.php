@@ -22,17 +22,22 @@ $albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
     <div class="container mt-4">
         <div class="row g-5">
           <?php
+          if(count($albumes) > 0){ //si hay albumes los muestra
             foreach ($albumes as $a){
               echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 ">
               
               <div class="card-body">
-              <img class="card-img-top" style="border-radius: 10px" src="' . $a['urlPortadaAlbum'] . '"/>
-              <h4 class="card-title">' . $a['tituloAlbum'] . '</h4>
-              <p class="card-text">' . $a['nombreUsuario'] . ' ' . $a['apellidoUsuario'] .' - @' . $a['arrobaUsuario'] . '</p> 
+              <img class="card-img-top" style="border-radius: 10px" src="' . $a->urlPortada . '"/>
+              <h4 class="card-title">' . $a->tituloAlbum . '</h4>
+              <p class="card-text">' . $a->apodoUsuario .' - @' . $a->arrobaUsuario . '</p> 
               </div>
 
               </div>';
             }
+          }else{
+            echo '<p class="text">Aún no hay álbumes disponibles.<br>¡Sé el primero en publicar!';
+          }
+            
           ?>
         </div>
     </div>
