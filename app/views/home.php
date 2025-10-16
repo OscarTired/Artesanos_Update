@@ -22,7 +22,7 @@ $albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
     <div class="container mt-4">
         <div class="row g-5">
           <?php
-          if(count($albumes) > 0){ //si hay albumes los muestra
+          if(!empty($albumes) && count($albumes) >0 ){ //si hay albumes los muestra
             foreach ($albumes as $a){
               echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 ">
               
@@ -35,7 +35,7 @@ $albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
               </div>';
             }
           }else{
-            echo '<p class="text">Aún no hay álbumes disponibles.<br>¡Sé el primero en publicar!';
+            echo '<p class="text-center">Aún no hay álbumes disponibles.<br>¡Sé el primero en publicar!';
           }
             
           ?>
