@@ -28,7 +28,15 @@ $albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
               
               <div class="card-body">
               <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="' . $a->urlPortada . '"/>
-              <h4 class="card-title">' . $a->tituloAlbum . '</h4>
+
+              <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">' . $a->tituloAlbum . '</h5>
+              <div class="d-flex gap-2">
+              <img src="../../public/assets/images/like.png" alt="Me gusta" class="img-fluid me-4 me-sm-1" style="max-height: 25px; cursor: pointer; margin-top: 5px">
+              <img src="../../public/assets/images/comentario.png" alt="Comentario" class="img-fluid me-4 me-sm-1" style="max-height: 23px; cursor: pointer; margin-top: 5px">
+              </div>
+              
+              </div>
               <p class="card-text">' . $a->apodoUsuario .' - @' . $a->arrobaUsuario . '</p> 
               </div>
 
