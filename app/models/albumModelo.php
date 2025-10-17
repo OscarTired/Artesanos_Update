@@ -26,7 +26,7 @@ class AlbumModelo{
         if($resultado){
             $id = mysqli_insert_id($conexion);
             $album->idAlbum = $id;
-            $album->agregarDatosUsuario();
+            $album->agregarDatosUsuario($album);
         }
 
         cerrarConexion($conexion);
@@ -50,8 +50,8 @@ class AlbumModelo{
             $a->setUsuario($fila['apodoUsuario'], $fila['arrobaUsuario']);
         }
 
-        return $a;
         cerrarConexion($conexion);
+        return $a;
     }
     
     public function mostrarTodos(){ //devuelve todos los albumes publicos y privados

@@ -1,5 +1,5 @@
 <?php
-include '../controllers/album.php';
+include '../controllers/albumControlador.php';
 $albumes = new AlbumCont();
 $albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
 ?>
@@ -27,7 +27,7 @@ $albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
               echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 ">
               
               <div class="card-body">
-              <img class="card-img-top" style="border-radius: 10px" src="' . $a->urlPortada . '"/>
+              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="' . $a->urlPortada . '"/>
               <h4 class="card-title">' . $a->tituloAlbum . '</h4>
               <p class="card-text">' . $a->apodoUsuario .' - @' . $a->arrobaUsuario . '</p> 
               </div>
