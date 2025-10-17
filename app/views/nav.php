@@ -1,13 +1,3 @@
-<?php
-
-//nav para que sea igual en todas las paginas
-// LINKEAR EL CSS Y BOOTSTRAP!!!!
-// <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-// <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-// <link rel="stylesheet" href="../../public/assets/css/nav.css">
-// <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-
-echo '
 <nav class="navbar navbar-expand-lg sticky-top shadow-sm" style="background-color: #FFFFF0; ">
   <div class="container-fluid">
 
@@ -37,19 +27,31 @@ echo '
             <input type="text" class="form-control buscador" name="query" placeholder="Buscar..." required>
           </form>
         </div>
+        <div class="d-flex justify-content-center justify-content-lg-end align-items-center gap-3 ms-lg-3">
 
         <!-- iconos de notificacion y perfil -->
-        <div class="d-flex justify-content-center justify-content-lg-end align-items-center gap-3 ms-lg-3">
-          <button class="btn position-relative">
-            <i class="bi bi-bell fs-5"></i>
-            <span class="position-absolute top-80 start-80 translate-middle p-1 bg-danger border border-light rounded-circle">
-              <span class="visually-hidden">Notificación</span>
-            </span>
-          </button>
+         <?php
+         if(!isset($_SESSION['usuario'])) {
+          echo'
+          <a href="login.php" class="btn follow-btn text-white px-4 rounded-5" role="button"><i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión</a>
+            ';
+         }else{
+           echo'
+              <button class="btn position-relative">
+                <i class="bi bi-bell fs-5"></i>
+                <span class="position-absolute top-80 start-80 translate-middle p-1 bg-danger border border-light rounded-circle">
+                  <span class="visually-hidden">Notificación</span>
+                </span>
+              </button>
+              <a href="perfil.php">
+                <img src="../../public/assets/images/imagen.png" alt="Perfil" class="rounded-circle" style="height: 40px; width: 40px; object-fit: cover;">
+              </a>
+           ';
+         }
+         ?>
 
-          <a href="perfil.php">
-            <img src="../../public/assets/images/imagen.png" alt="Perfil" class="rounded-circle" style="height: 40px; width: 40px; object-fit: cover;">
-          </a>
+
+
         </div>
 
       </div>
@@ -57,6 +59,3 @@ echo '
 
   </div>
 </nav>
-';
-
-?>
