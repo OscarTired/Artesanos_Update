@@ -99,7 +99,7 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
     </div>
 
     <?php
-    //if (!isset($_SESSION['idUsuario'])) include 'registro.php'; //si no inicio sesion se muestra el formulario de registro
+    if (!isset($_SESSION['idUsuario'])) include 'registro.php'; //si no inicio sesion se muestra el formulario de registro
     ?>
     
 
