@@ -32,6 +32,26 @@
     transform: scale(1.01);
 }
 
-#inputPortada {
+#inputPortada, #inputImagenes {
     display: none;
+}
+#btnSiguiente,#btnCrear {
+    padding: 5px 20px;
+    background-color: #ff7f45;
+    border: 1px solid #ff7f45;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+#btnSiguiente:hover,#btnCrear:hover{
+  background-color: #fffffd;
+  color: #ff7f45;
+  border: 1px solid #ff7f45;
+}
+
+.formParteUno, .formParteDos{
+  display: none;
 }
