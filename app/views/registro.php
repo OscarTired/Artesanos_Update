@@ -1,21 +1,3 @@
-<?php
-
-?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Artesanos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../public/assets/css/registro.css">
-    <link rel="stylesheet" href="../../public/assets/css/footer.css">
-    <link rel="stylesheet" href="../../public/assets/css/nav.css">
-</head>
-<body>
-<?php
-
-?>
-
 
 <div class="register-container">
     <div class="register-logo">
@@ -23,7 +5,7 @@
     </div>
 
     <h5>Artesanos</h5>
-    <p>Necesitás una cuenta para seguir viéndolo</p>
+    <p>¡Necesitás una cuenta para seguir viendo!</p>
 
     <div class="register-box">
       <form action="registro.php" method="POST">
@@ -53,12 +35,4 @@
       </form>
     </div>
   </div>
-
-<?php
-
-?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
 
