@@ -17,8 +17,8 @@ class AlbumCont{
         return $this->albumModelo->mostrarTodos();
     }
 
-    public function mostrarPublicos(){
-        return $this->albumModelo->mostrarPublicos();
+    public function mostrarAlbumes($id){
+        return $this->albumModelo->mostrarAptos($id);
     }
 }
 ?>

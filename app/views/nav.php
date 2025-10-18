@@ -33,7 +33,7 @@
          <?php
          if(!isset($_SESSION['usuario'])) {
           echo'
-          <a href="login.php" class="btn follow-btn text-white px-4 rounded-5" role="button"><i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión</a>
+          <a href="#registro" class="btn follow-btn text-white px-4 rounded-5" role="button"><i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión</a>
             ';
          }else{
            echo'

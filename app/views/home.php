@@ -1,7 +1,13 @@
 <?php
 include '../controllers/albumControlador.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$idUsuario = isset($_SESSION['usuario']) ? $_SESSION['usuario'] : 0;
+
 $albumes = new AlbumCont();
-$albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
+$albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la bd
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -18,6 +24,7 @@ $albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
     <link rel="stylesheet" href="../../public/assets/css/nav.css">
     <link rel="stylesheet" href="../../public/assets/css/registro.css">
     <link rel="stylesheet" href="../../public/assets/css/footer.css">
+    <link rel="stylesheet" href="../../public/assets/css/home.css">
 </head>
 <body>
     <?php include 'nav.php'; ?>
@@ -47,13 +54,52 @@ $albumes = $albumes->mostrarTodos(); //recuperar los albumes de la bd
           }else{
             echo '<p class="text-center">Aún no hay álbumes disponibles.<br>¡Sé el primero en publicar!';
           }
-            
           ?>
         </div>
     </div>
+    <!-- boton para crear album -->
+    <div id="mostrarFormulario"><span class="fs-5 fw-bold" style="transform: translateY(-2px); display: inline-block;">+</span></div>
+    
+    <!--formulario crear album -->
+    <div id="formularioCrearAlbum">
+      
+      <div class="container">
+        <button id="cerrarFormulario" class="btn btn-danger btn-sm float-end">✕</button>
+        <h4 class="mb-4">Sube tu portada</h4>
+
+        <form action="../controllers/albumControlador.php" method="POST" enctype="multipart/form-data">
+          <div class="row align-items-center">
+            
+            <div class="col-lg-6 col-12 mb-3">
+
+              <label for="inputPortada" class="imagenParaSubir"><img src="../../public/assets/images/agregarImagen.png" alt="Subir portada"></label>
+              <input type="file" name="subirPortada" id="inputPortada" accept="image/*" required>
+
+              <img id="previewPortada" style="max-width: 100%; margin-top: 10px; display: none;">
+                
+            </div>
+            <div class="col-lg-6 col-12 ">
+              <input type="text" class="form-control mb-3" placeholder="Título del álbum">
+
+              <input type="text" class="form-control mb-3" placeholder="#etiqueta">
+
+              <select name="privacidad" id="privacidad" class="form-select mb-3">
+                <option value="publico" selected>Para todo el mundo</option>
+                <option value="privado">Para mis seguidores</option>
+              </select>
+            </div>
+            
+          </div>
+        </form>
+
+      
+      
+
+      </div>
+    </div>
 
     <?php
-    if (!isset($_SESSION['idUsuario'])) include 'registro.php'; //si no inicio sesion se muestra el formulario de registro
+    //if (!isset($_SESSION['idUsuario'])) include 'registro.php'; //si no inicio sesion se muestra el formulario de registro
     ?>
     
 

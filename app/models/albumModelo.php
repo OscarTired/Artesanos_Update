@@ -79,10 +79,16 @@ class AlbumModelo{
         }
     }
 
-    public function mostrarPublicos(){ //devuelve todos los albumes publicos
+    public function mostrarAptos($idUsuarioActual){ //devuelve todos los albumes que puede ver el usuario actual (publicos y privados de usuarios que sigue)
         $conexion = abrirConexion();
 
-        $consulta = 'SELECT a.idAlbum, a.tituloAlbum, a.esPublicoAlbum, a.urlPortadaAlbum, u.idUsuario, u.apodoUsuario, u.arrobaUsuario FROM album a JOIN usuario u ON a.idUsuarioAlbum = u.idUsuario WHERE a.esPublicoAlbum = 1';
+        $consulta = "SELECT a.idAlbum, a.tituloAlbum, a.esPublicoAlbum, a.urlPortadaAlbum,
+         u.idUsuario, u.apodoUsuario, u.arrobaUsuario
+         FROM album a
+         JOIN usuario u ON a.idUsuarioAlbum = u.idUsuario
+         LEFT JOIN seguimiento s ON s.idSeguido = u.idUsuario
+         WHERE a.esPublicoAlbum = 1
+         OR (s.idSeguidor = $idUsuarioActual AND s.estadoSeguimiento = 'seguido')";
 
         $resultado = mysqli_query($conexion,$consulta);
         $nfilas = mysqli_num_rows($resultado);

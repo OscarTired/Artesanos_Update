@@ -1,5 +1,5 @@
 
-<div class="register-container">
+<div class="register-container" id="registro">
     <div class="register-logo">
       <img src="../../public/assets/images/logo.png" alt="Artesanos" width="80">
     </div>
