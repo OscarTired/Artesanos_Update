@@ -1,0 +1,148 @@
+
+
+.register-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; 
+  text-align: center;
+  background-color: #fafafa;
+  padding: 40px 20px;
+  margin-top: 40px; 
+}
+
+
+/* === LOGO === */
+.register-logo img {
+  margin-bottom: 10px;
+  
+}
+
+/* === CAJA DEL FORMULARIO === */
+.register-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px 25px;
+  margin-top: 15px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  width: 420px;
+  max-width: 90%;
+}
+
+/* === TITULOS === */
+h5 {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+p {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* === FILAS DE DOS CAMPOS === */
+.form-row {
+  display: flex;
+  gap: 10px;                
+  margin-bottom: 12px;
+}
+
+.form-row input {
+  flex: 1;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s ease;
+}
+
+/* === CAMPO INDIVIDUAL === */
+.form-single {
+  margin-bottom: 12px;
+}
+
+.form-single input {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s ease;
+}
+
+/* === EFECTO DE ENFOQUE === */
+input:focus {
+  border-color: #f97316;
+  outline: none;
+}
+
+/* === PLACEHOLDER === */
+input::placeholder {
+  color: #999;
+}
+
+/* === BOTONES === */
+.btn-outline,
+.btn-main {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Botón “Ya tengo una cuenta” */
+.btn-outline {
+  background-color: #fff;
+  color: #f97316;
+  border: 1px solid #f97316;
+}
+.btn-outline:hover {
+  background-color: #f97316;
+  color: #fff;
+}
+
+/* Botón “Registrarse” */
+.btn-main {
+  background-color: #f97316;
+  color: #fff;
+  border: none;
+}
+.btn-main:hover {
+  background-color: #e25e00;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 480px) {
+  .form-row {
+    flex-direction: column;
+  }
+}
+/* --- Validaciones visuales --- */
+.is-valid {
+  border: 2px solid #22c55e !important;
+}
+
+.is-invalid {
+  border: 2px solid #ef4444 !important;
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 3px;
+  display: block;
+}
+
+/* Para inputs válidos */
+.form-control.is-valid {
+  box-shadow: 0 0 0 0.15rem rgba(34, 197, 94, 0.25);
+}
+
+/* Para inputs inválidos */
+.form-control.is-invalid {
+  box-shadow: 0 0 0 0.15rem rgba(239, 68, 68, 0.25);
+}
+
+
+
