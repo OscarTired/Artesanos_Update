@@ -23,11 +23,20 @@
 }
 
 .imagenParaSubir {
+  aspect-ratio: 1 / 1;
     cursor: pointer;
     max-width: 150px;
     transition: transform 0.2s ease;
 }
-
+.imagenCuadrada {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+  max-width: 450px;
+  border-radius: 8px;
+  margin-top: 10px; 
+  display: none;
+}
 .imagenParaSubir:hover {
     transform: scale(1.01);
 }
@@ -35,8 +44,8 @@
 #inputPortada, #inputImagenes {
     display: none;
 }
-#btnSiguiente,#btnCrear {
-    padding: 5px 20px;
+#btnSiguiente,#btnCrear,#btnSiguiente2 {
+    padding: 6px 20px;
     background-color: #ff7f45;
     border: 1px solid #ff7f45;
     color: #fff;
@@ -46,12 +55,15 @@
     text-align: center;
     transition: background-color 0.3s ease;
 }
-#btnSiguiente:hover,#btnCrear:hover{
+#btnSiguiente:hover,#btnCrear:hover,#btnSiguiente2:hover {
   background-color: #fffffd;
   color: #ff7f45;
   border: 1px solid #ff7f45;
 }
 
-.formParteUno, .formParteDos{
-  display: none;
+.imagenPreview {
+  width: 100%;
+  max-height: 600px;
+  object-fit: cover;
+  border-radius: 8px;
 }

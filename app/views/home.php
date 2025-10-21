@@ -75,23 +75,23 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
         </div>
 
         <div class="modal-body">
-          <form action="../controllers/albumControlador.php" method="POST" enctype="multipart/form-data" onsubmit="validarCrearAlbum()">
+          <form id="formCrearAlbum" enctype="multipart/form-data">
 
             <div id="formParteUno">
               <div class="row align-items-center">
                 <h4 mb-3>Sube la portada</h4>
                 <div class="col-lg-6 col-12 mb-3">
 
-                  <label for="inputPortada" class="imagenParaSubir"><img src="../../public/assets/images/agregarImagen.png" alt="Subir portada"></label>
+                  <label for="inputPortada" class="imagenParaSubir" id="portada"><img src="../../public/assets/images/agregarImagen.png" alt="Subir portada"></label>
                   <input type="file" name="subirPortada" id="inputPortada" accept="image/*" required>
 
-                  <img id="previoPortada" style="max-width: 100%; margin-top: 10px; display: none;">
+                  <img id="previoPortada" class="imagenCuadrada">
 
                 </div>
                 <div class="col-lg-6 col-12 ">
-                  <input type="text" class="form-control mb-3" placeholder="Título del álbum">
+                  <input id="tituloAlb" type="text" class="form-control mb-3" placeholder="Título del álbum" required>
 
-                  <input type="text" class="form-control mb-3" placeholder="#etiqueta">
+                  <input id="etiquetaAlb" type="text" class="form-control mb-3" placeholder="#etiqueta">
 
                   <select name="privacidad" id="privacidad" class="form-select mb-3">
                     <option value="publico" selected>Para todo el mundo</option>
@@ -100,50 +100,48 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
 
                   <div class="text-end">
 
-                    <button id="btnSiguiente" onclick="mostrarSigForm()" class="mt-5">Siguiente</button>
+                    <button id="btnSiguiente" type="button" onclick="mostrarSigForm()" class="mt-5">Siguiente</button>
 
                   </div>
                 </div>
               </div>
             </div>
         </div>
-        <!-- segunda parte del formulario -->
+        <!-- segunda parte del formulario: subida de imagenes -->
         <div id="formParteDos" class="d-none">
           <h4>Sube las imágenes</h4>
           <p class="mb-4">¡Recuerda que puedes subir hasta 20 imágenes!</p>
-          <div class="row align-items-center">
-            <div class="col-12 text-center mb-3">
-
-
-              <label for="inputImagenes" class="imagenParaSubir d-inline-block"><img src="../../public/assets/images/agregarImagen.png" alt="Subir portada"></label>
-              <input type="file" name="inputImagenes" id="inputImagenes" accept="image/*" required>
-              <img id="previoImagen" style="max-width: 100%; margin-top: 10px; display: none;">
+          <div class="row">
+            <div class="col-lg-3"></div>
+            <div class="col-lg-4 col-12">
+              <label for="inputImagenes" class="imagenParaSubir"><img src="../../public/assets/images/agregarImagen.png" alt="Subir portada"></label>
+              <input type="file" name="inputImagenes" id="inputImagenes" accept="image/*" multiple>
             </div>
-
-
-            
-
 
           </div>
         </div>
+        <!-- tercera parte del formulario: datos de las imagenes -->
         <div id="formParteTres" class="d-none">
-          <div class="col-lg-6 col-12 ">
-            <input type="text" class="form-control mb-3" placeholder="Título de la imagen">
+          <h4>¿Le agregas detalles?</h4>
+          <p class="mb-4">¡Todo es opcional!</p>
 
-            <textarea class="form-control mb-3" id="descripcionImagen" rows="4" placeholder="Descripción" style="resize: none;"></textarea>
+          <!--se carga las imagenes q subio el usuario dinamicamente -->
+          <div id="bloqueImagenActual"></div>
 
-            <input type="text" class="form-control mb-3" placeholder="#etiqueta">
+          <div class="text-end">
+            <button id="btnAnteriorImagen" type="button" class="btn btn-outline-secondary me-2">Anterior</button>
 
-            <div class="text-end">
+            <button id="btnSiguienteImagen" type="button" class="btn btn-secondary">Siguiente</button>
 
-              <button id="btnCrear" type="submit" class="mt-5">Crear álbum</button>
+            <button id="btnCrear" type="submit" class="mt-5">Crear álbum</button>
 
-            </div>
           </div>
         </div>
       </div>
     </div>
-    </form>
+  </div>
+  </div>
+  </form>
   </div>
 
 
@@ -155,7 +153,7 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
   if (!isset($_SESSION['idUsuario'])) include 'registro.php'; //si no inicio sesion se muestra el formulario de registro
   ?>
 
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   <script src="../../public/assets/js/home.js"></script>
 </body>
