@@ -67,3 +67,9 @@
   object-fit: cover;
   border-radius: 8px;
 }
+
+.was-validated .form-control:valid,
+.was-validated .form-control:invalid {
+  background-image: none !important;
+  padding-right: 0.75rem; 
+}

@@ -5,6 +5,7 @@
 // No contiene lógica de negocio ni acceso directo a la base de datos.
 
 include '../models/albumModelo.php';
+include '../models/imagenModelo.php';
 
 class AlbumCont{
     private $albumModelo;
@@ -19,6 +20,15 @@ class AlbumCont{
 
     public function mostrarAlbumes($id){
         return $this->albumModelo->mostrarAptos($id);
+    }
+
+    public function crearAlbum(Album $album){
+        return $this->albumModelo->crearAlbum($album);
+    }
+
+    public function guardarImagen($idAlbum, $titulo, $descripcion, $etiqueta, $url){
+        $imagenModelo = new ImagenModelo();
+        return $imagenModelo->crearImagen($idAlbum, $titulo, $descripcion, $etiqueta, $url);
     }
 }
 ?>

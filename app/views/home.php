@@ -39,7 +39,7 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
           echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 ">
               
               <div class="card-body">
-              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="' . $a->urlPortada . '"/>
+              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="/Artesanos/public/uploads/portadas/' . $a->urlPortada . '"/>
 
               <div class="d-flex justify-content-between align-items-center">
               <h5 class="card-title mb-0">' . $a->tituloAlbum . '</h5>
@@ -75,7 +75,7 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
         </div>
 
         <div class="modal-body">
-          <form id="formCrearAlbum" enctype="multipart/form-data">
+          <form id="formCrearAlbum" class="needs-validation" enctype="multipart/form-data">
 
             <div id="formParteUno">
               <div class="row align-items-center">
@@ -84,18 +84,22 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
 
                   <label for="inputPortada" class="imagenParaSubir" id="portada"><img src="../../public/assets/images/agregarImagen.png" alt="Subir portada"></label>
                   <input type="file" name="subirPortada" id="inputPortada" accept="image/*" required>
+                  <div class="invalid-feedback">Sube una imagen de portada.</div>
+
 
                   <img id="previoPortada" class="imagenCuadrada">
 
                 </div>
                 <div class="col-lg-6 col-12 ">
-                  <input id="tituloAlb" type="text" class="form-control mb-3" placeholder="Título del álbum" required>
+                  <input name="tituloAlb" id="tituloAlb" type="text" class="form-control" placeholder="Título del álbum" required>
+                  <div class="invalid-feedback">Completa el título del álbum. Debe tener al menos 3 letras.</div>
 
-                  <input id="etiquetaAlb" type="text" class="form-control mb-3" placeholder="#etiqueta">
+                  <input name="etiquetaAlb" id="etiquetaAlb" type="text" class="form-control mt-3" placeholder="#etiqueta">
+                  <div class="invalid-feedback">Si agregas alguna etiqueta, debe tener al menos 3 letras.</div>
 
-                  <select name="privacidad" id="privacidad" class="form-select mb-3">
-                    <option value="publico" selected>Para todo el mundo</option>
-                    <option value="privado">Para mis seguidores</option>
+                  <select name="privacidad" name="privacidad" class="form-select mt-3">
+                    <option value="1" selected>Para todo el mundo</option>
+                    <option value="0">Para mis seguidores</option>
                   </select>
 
                   <div class="text-end">
@@ -116,6 +120,8 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
             <div class="col-lg-4 col-12">
               <label for="inputImagenes" class="imagenParaSubir"><img src="../../public/assets/images/agregarImagen.png" alt="Subir portada"></label>
               <input type="file" name="inputImagenes" id="inputImagenes" accept="image/*" multiple>
+
+              <div class="invalid-feedback">Sube una imagen. El máximo son 20.</div>
             </div>
 
           </div>
@@ -123,7 +129,6 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
         <!-- tercera parte del formulario: datos de las imagenes -->
         <div id="formParteTres" class="d-none">
           <h4>¿Le agregas detalles?</h4>
-          <p class="mb-4">¡Todo es opcional!</p>
 
           <!--se carga las imagenes q subio el usuario dinamicamente -->
           <div id="bloqueImagenActual"></div>
@@ -133,7 +138,7 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
 
             <button id="btnSiguienteImagen" type="button" class="btn btn-secondary">Siguiente</button>
 
-            <button id="btnCrear" type="submit" class="mt-5">Crear álbum</button>
+            <button id="btnCrear" class="mt-5">Crear álbum</button>
 
           </div>
         </div>
