@@ -1,0 +1,113 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.contenedor {
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+    width: 90%;
+    max-width: 1200px;
+}
+
+.tarjeta {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    padding-bottom: 15px;
+    transition: transform 0.2s ease;
+}
+
+.tarjeta:hover {
+    transform: scale(1.02);
+}
+
+.banner {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-top: -40px;
+    border: 3px solid white;
+}
+
+.tarjeta h3 {
+    margin: 5px 0;
+}
+
+.tarjeta p {
+    margin: 3px 0;
+    color: #777;
+    font-size: 14px;
+}
+
+.stats {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+.seguir, .verPerfil {
+    display: block;
+    width: 80%;
+    margin: 8px auto;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.seguir {
+    background: #ff8c42;
+    color: white;
+}
+
+.verPerfil {
+    background: white;
+    border: 1px solid #ff8c42;
+    color: #ff8c42;
+}
+
+.sin-resultados {
+    text-align: center;
+    color: #666;
+    margin-top: 50px;
+}
+.verPerfil {
+    display: block;
+    width: 80%;
+    margin: 8px auto;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ff8c42;
+    background-color: white;
+    color: #ff8c42;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.verPerfil:hover {
+    background-color: #ff8c42;
+    color: white;
+}

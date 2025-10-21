@@ -23,7 +23,7 @@
             <label class="btn btn-blanco-negro btn-sm" for="btnAlbumes">Álbumes</label>
           </div>
 
-          <form method="GET" action="buscar.php" class="mx-auto" style="max-width:100%;">
+          <form method="GET" action="busqueda.php" class="mx-auto" style="max-width:100%;">
             <input type="text" class="form-control buscador" name="query" placeholder="Buscar..." required>
           </form>
         </div>
