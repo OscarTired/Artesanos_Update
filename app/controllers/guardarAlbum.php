@@ -20,7 +20,7 @@ $controlador = new AlbumCont();
 } */
 
 $album = new Album($_POST['tituloAlbum'], isset($_POST['esPublico']) ? intval($_POST['esPublico']) : 1, guardarArchivo($_FILES['portada'], 'portadas'), 1);
-
+//cuando este sesiones $album = new Album($_POST['tituloAlbum'], isset($_POST['esPublico']) ? intval($_POST['esPublico']) : 1, guardarArchivo($_FILES['portada'], 'portadas'), $_SESSION['idUsuario']);
 $idAlbum = $controlador->crearAlbum($album);
 
 if (!$idAlbum) {
