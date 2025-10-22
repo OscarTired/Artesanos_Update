@@ -4,8 +4,16 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '../../config/conexion.php';
 $conexion = abrirConexion();
 
-/* 1) ID del perfil a mostrar (Luismi por defecto) */
-$userId = isset($_GET['id']) ? (int)$_GET['id'] : 1;
+/* 1) ID del perfil a mostrar */
+if (isset($_GET['id'])) {
+    $userId = (int)$_GET['id'];
+} elseif (isset($_SESSION['usuario']['id'])) {
+    $userId = (int)$_SESSION['usuario']['id'];
+} else {
+    // CORRECCIÓN: Si no hay ID en la URL y no está logueado, redirige a home.php.
+    header('Location: home.php');
+    exit;
+}
 
 /* 2) Traer usuario con su foto (usa idFotoPerfilUsuario) */
 $sqlUser = "
@@ -17,10 +25,11 @@ $sqlUser = "
     u.apellidoUsuario,
     u.descripcionUsuario,
     u.idFotoPerfilUsuario,
+    u.correoUsuario,    
     fp.imagenPerfil
   FROM usuario u
   LEFT JOIN fotosdeperfil fp 
-         ON fp.idFotoPerfil = u.idFotoPerfilUsuario
+          ON fp.idFotoPerfil = u.idFotoPerfilUsuario
   WHERE u.idUsuario = {$userId}
   LIMIT 1
 ";
@@ -35,21 +44,25 @@ if (!$u) { http_response_code(404); exit('Usuario no encontrado'); }
 
 /* 3) Normalizar a tu array $user usado en la vista */
 $user = [
-  'avatar'     => $u['imagenPerfil'] ?: 'https://i.pravatar.cc/120',
-  'name'       => trim($u['nombreUsuario'] . ' ' . $u['apellidoUsuario']),
-  'username'   => $u['arrobaUsuario'],            // ej: luismi, chayanne, davib, rickym
-  'bio'        => (string)$u['descripcionUsuario'],
-  'followers'  => 999,                            // mock mientras no tengas tabla
-  'following'  => 999,
-  'is_private' => false,                          // ajústalo si luego agregas campo
+  'avatar'      => $u['imagenPerfil'] ?: 'https://i.pravatar.cc/120',
+  'name'        => trim($u['nombreUsuario'] . ' ' . $u['apellidoUsuario']),
+  'username'    => $u['arrobaUsuario'],
+  'bio'         => (string)$u['descripcionUsuario'],
+  'followers'   => 999,
+  'following'   => 999,
+  'is_private'  => false,
 ];
 
 /* 4) Permisos (dueño/visitante) */
-$isOwner  = isset($_SESSION['user']['id']) && (int)$_SESSION['user']['id'] === (int)$u['idUsuario'];
-$puedeVer = !$user['is_private'] || $isOwner;     // por ahora true
+$isOwner  = isset($_SESSION['usuario']['id']) && (int)$_SESSION['usuario']['id'] === (int)$u['idUsuario'];
+
+// CORRECCIÓN: Definición de la variable $soloPublicos
+$soloPublicos = !$isOwner;
+
+$puedeVer = !$user['is_private'] || $isOwner;
+
 
 /* 5) Álbumes del usuario */
-$soloPublicos = !$isOwner; // visitantes ven solo públicos
 $sqlAlbums = "
   SELECT idAlbum, tituloAlbum, esPublicoAlbum, urlPortadaAlbum
   FROM album
@@ -77,6 +90,18 @@ function kfmt($n){ return $n>=1000 ? number_format($n/1000, ($n%1000===0?0:1)).'
   <link rel="stylesheet" href="../../public/assets/css/nav.css">
   <title><?= e($user['name']) ?> (@<?= e($user['username']) ?>)</title>
   <style>
+    /* Estilo para el botón naranja personalizado */
+    .btn-custom-orange {
+      background-color: #f7931e;
+      border-color: #f7931e;
+      color: white;
+    }
+    .btn-custom-orange:hover {
+      background-color: #e58514;
+      border-color: #e58514;
+      color: white;
+    }
+    /* Estilos generales */
     body{background:#fff;}
     .profile-bar{border-bottom:1px solid #e9ecef}
     .avatar{width:64px;height:64px;border-radius:50%;object-fit:cover}
@@ -91,7 +116,6 @@ function kfmt($n){ return $n>=1000 ? number_format($n/1000, ($n%1000===0?0:1)).'
 
 <?php include 'nav.php'; ?>
 
-<!-- HEADER PERFIL -->
 <div class="container py-3 profile-bar">
   <div class="d-flex align-items-center gap-3">
     <img class="avatar" src="<?= e($user['avatar']) ?>" alt="avatar">
@@ -115,27 +139,44 @@ function kfmt($n){ return $n>=1000 ? number_format($n/1000, ($n%1000===0?0:1)).'
         <div class="small muted">Abones</div>
       </div>
     </div>
+    
+    <button type="button" class="btn btn-success rounded-circle me-3" 
+            data-bs-toggle="modal" data-bs-target="#contactModal" 
+            title="Contactar">
+      <i class="bi bi-envelope-fill"></i>
+    </button>
 
     <?php if ($isOwner): ?>
       <div class="d-flex align-items-center gap-2">
-        <a href="/perfil/editar.php" class="btn btn-outline-secondary px-4 rounded-5">
+        <a href="editarPerfil.php" class="btn btn-custom-orange px-4 rounded-5">
           <i class="bi bi-pencil-square me-1"></i> Editar perfil
         </a>
-        <form action="/logout.php" method="post" class="m-0">
-          <button type="submit" class="btn btn-danger px-4 rounded-5">
+        <form action="cerrarSesion.php" method="post" class="m-0">
+          <button type="submit" class="btn btn-custom-orange px-4 rounded-5">
             <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
           </button>
         </form>
       </div>
     <?php else: ?>
-      <a href="/seguir.php?usuario=<?= (int)$u['idUsuario'] ?>" class="btn follow-btn text-white px-4 rounded-5">
-        <i class="bi bi-person-plus me-1"></i> Seguir
-      </a>
+      <?php 
+        // 1. Si NO hay sesión iniciada, el botón Seguir redirige a login.php
+        if (!isset($_SESSION['usuario']['id'])): 
+      ?>
+          <a href="login.php" class="btn btn-custom-orange px-4 rounded-5">
+            <i class="bi bi-person-plus me-1"></i> Seguir
+          </a>
+      <?php 
+        // 2. Si SÍ hay sesión iniciada, el botón Seguir va a la lógica de seguir
+        else: 
+      ?>
+          <a href="/seguir.php?usuario=<?= (int)$u['idUsuario'] ?>" class="btn btn-custom-orange px-4 rounded-5">
+            <i class="bi bi-person-plus me-1"></i> Seguir
+          </a>
+      <?php endif; ?>
     <?php endif; ?>
   </div>
 </div>
 
-<!-- TABS / ICONO CUADRÍCULA -->
 <div class="container tabbar">
   <div class="d-flex align-items-center gap-3 py-2">
     <i class="bi bi-grid-3x3-gap-fill fs-4 text-success"></i>
@@ -143,7 +184,6 @@ function kfmt($n){ return $n>=1000 ? number_format($n/1000, ($n%1000===0?0:1)).'
   </div>
 </div>
 
-<!-- CONTENIDO -->
 <div class="container">
   <?php if (!$puedeVer): ?>
     <div class="private-box">
@@ -178,6 +218,24 @@ function kfmt($n){ return $n>=1000 ? number_format($n/1000, ($n%1000===0?0:1)).'
       </div>
     <?php endif; ?>
   <?php endif; ?>
+</div>
+
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contactModalLabel">Contactar a <?= e($user['name']) ?></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Puedes contactar a **<?= e($u['nombreUsuario'] . ' ' . $u['apellidoUsuario']) ?>** (@<?= e($user['username']) ?>) usando el siguiente correo electrónico:</p>
+        <p class="lead fw-bold text-success"><?= e($u['correoUsuario'] ?? 'Correo no disponible') ?></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>

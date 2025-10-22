@@ -4,7 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-$idUsuario = isset($_SESSION['usuario']) ? $_SESSION['usuario'] : 0;
+// home.php (Línea 7 - CORREGIDO)
+$idUsuario = isset($_SESSION['usuario']['id']) ? (int)$_SESSION['usuario']['id'] : 0;
 
 $albumes = new AlbumCont();
 $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la bd

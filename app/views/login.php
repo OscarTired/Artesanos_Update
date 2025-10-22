@@ -1,8 +1,8 @@
 <?php
+
+session_start();
 require_once '../../config/conexion.php';
 require_once '../../config/cerrarConexion.php';
-
-$conexion = abrirConexion();
 
 $serverMessage = '';
 $serverMessageType = '';
@@ -19,40 +19,70 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $serverMessage = 'La contraseña debe tener al menos 6 caracteres.';
     $serverMessageType = 'warning';
   } else {
-    $stmt = $conexion->prepare("SELECT idUsuario FROM usuario WHERE arrobaUsuario = ?");
+    $conexion = abrirConexion();
+
+    $stmt = $conexion->prepare("SELECT idUsuario, nombreUsuario, apellidoUsuario, apodoUsuario, arrobaUsuario, correoUsuario, contrasenaUsuario, idFotoPerfilUsuario FROM usuario WHERE arrobaUsuario = ?");
     $stmt->bind_param("s", $usuario);
     $stmt->execute();
-    $stmt->store_result();
+    $resultado = $stmt->get_result();
 
-    if ($stmt->num_rows > 0) {
-      $serverMessage = 'Inicio de sesión exitoso. Redirigiendo al home...';
-      $serverMessageType = 'success';
-      $redirScript = "<script>setTimeout(()=>{ window.location.href = 'home.php'; }, 2000);</script>";
+    if ($resultado->num_rows === 1) {
+      $user = $resultado->fetch_assoc();
+
+      // Verificamos password (asume hash BCRYPT guardado en contrasenaUsuario)
+      if (password_verify($password, $user['contrasenaUsuario'])) {
+        // Guardar la sesión con campos útiles
+        $_SESSION['usuario'] = [
+          'id'     => $user['idUsuario'],
+          'nombre' => $user['nombreUsuario'],
+          'apellido' => $user['apellidoUsuario'],
+          'apodo'  => $user['apodoUsuario'],
+          'arroba' => $user['arrobaUsuario'],
+          'correo' => $user['correoUsuario'],
+          'avatar' => $user['idFotoPerfilUsuario'] // puede ser NULL o filename
+        ];
+
+
+        $serverMessage = 'Inicio de sesión exitoso. Redirigiendo...';
+        $serverMessageType = 'success';
+        $redirScript = "<script>setTimeout(()=>{ window.location.href = 'home.php'; }, 800);</script>";
+      } else {
+        // CONTRASEÑA INCORRECTA
+          session_unset();    // <-- AÑADIR ESTA LÍNEA
+          session_destroy();  // <-- AÑADIR ESTA LÍNEA
+          session_start();    // <-- AÑADIR (para que el mensaje de error se muestre)
+
+          $serverMessage = 'Contraseña incorrecta.';
+          $serverMessageType = 'danger';
+      }
     } else {
-      $serverMessage = 'Usuario no encontrado o contraseña incorrecta.';
+      // USUARIO NO ENCONTRADO
+      session_unset();    // <-- AÑADIR ESTA LÍNEA
+      session_destroy();  // <-- AÑADIR ESTA LÍNEA
+      session_start();    // <-- AÑADIR (para que el mensaje de error se muestre)
+
+      $serverMessage = 'Usuario no encontrado.';
       $serverMessageType = 'danger';
     }
+
     $stmt->close();
+    cerrarConexion($conexion);
   }
-  cerrarConexion($conexion);
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar Sesión | Artesanos</title>
-  <!--bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- ENLACE AL CSS -->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Iniciar Sesión | Artesanos</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../../public/assets/css/re.css">
 </head>
+
 <body>
-
-
   <div class="register-container" id="registro">
     <div class="register-logo">
       <img src="../../public/assets/images/logo.png" alt="Artesanos" width="80">
@@ -62,79 +92,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <p>¡Necesitás una cuenta para seguir viendo!</p>
 
     <?php if ($serverMessage): ?>
-      <div class="alert alert-<?php echo $serverMessageType; ?>">
-        <?php echo $serverMessage; ?>
+      <div class="alert alert-<?php echo htmlspecialchars($serverMessageType); ?> text-center" style="width:80%; margin:10px auto;">
+        <?php echo htmlspecialchars($serverMessage); ?>
       </div>
       <?php echo $redirScript ?? ''; ?>
     <?php endif; ?>
 
     <div class="register-box">
       <form action="login.php" method="POST" id="registroForm" novalidate>
-
-        <div class="form-group">
+        <div class="form-group mb-3">
           <input type="text" class="form-control" name="usuario" placeholder="@usuario" required>
           <small class="error-text"></small>
         </div>
-
-        <div class="form-group">
+        <div class="form-group mb-3">
           <input type="password" class="form-control" name="password" placeholder="Contraseña" required minlength="6">
           <small class="error-text"></small>
         </div>
 
         <div class="button-row">
-          <button type="submit" class="btn btn-main">Iniciar sesión</button>
-          <button type="button" class="btn btn-outline" onclick="window.location.href='registro.php'">Quiero registrarme</button>
+          <button type="submit" class="btn btn-main w-100 mb-2">Iniciar sesión</button>
+          <button type="button" class="btn btn-outline w-100" onclick="window.location.href='home.php'">Quiero registrarme</button>
         </div>
       </form>
     </div>
   </div>
 
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("registroForm");
-    const inputs = form.querySelectorAll(".form-control");
-
-    inputs.forEach(input => {
-      input.addEventListener("input", () => validarCampo(input));
-    });
-
-    form.addEventListener("submit", e => {
-      let valido = true;
-      inputs.forEach(input => {
-        if (!validarCampo(input)) valido = false;
-      });
-      if (!valido) e.preventDefault();
-    });
-
-    function validarCampo(input) {
-      const errorText = input.parentElement.querySelector(".error-text");
-      let valido = true;
-      let mensaje = "";
-
-      if (input.name === "usuario" && input.value.trim().length < 3) {
-        valido = false;
-        mensaje = "El usuario debe tener al menos 3 caracteres.";
-      } else if (input.name === "password" && input.value.length < 6) {
-        valido = false;
-        mensaje = "La contraseña debe tener al menos 6 caracteres.";
-      }
-
-      if (!valido) {
-        input.classList.remove("is-valid");
-        input.classList.add("is-invalid");
-        errorText.textContent = mensaje;
-      } else {
-        input.classList.remove("is-invalid");
-        input.classList.add("is-valid");
-        errorText.textContent = "";
-      }
-      return valido;
-    }
-  });
-  </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>  
 
-
+</html>
