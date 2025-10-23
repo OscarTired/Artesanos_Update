@@ -1,142 +1,172 @@
 <?php
+// app/views/procesarEdicion.php
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-if (!isset($_SESSION['usuario']['id'])) {
-    header('Location: login.php');
+if (!isset($_SESSION['usuario']['id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: login.php'); exit;
+}
+
+// conexión (subir 2 niveles hasta la raíz del proyecto)
+require_once dirname(__DIR__, 2) . '/config/conexion.php';
+$conexion = abrirConexion();
+if ($conexion === false || $conexion->connect_error) {
+    die("Error de conexión a la base de datos.");
+}
+
+$userId = (int)$_SESSION['usuario']['id'];
+$errors = [];
+
+// Helper
+function clean_input_db($conexion, $value) {
+    return mysqli_real_escape_string($conexion, trim((string)$value));
+}
+
+// 1) recoger datos
+$nombreUsuario = clean_input_db($conexion, $_POST['nombreUsuario'] ?? '');
+$apellidoUsuario = clean_input_db($conexion, $_POST['apellidoUsuario'] ?? '');
+$arrobaUsuario = clean_input_db($conexion, $_POST['arrobaUsuario'] ?? '');
+$apodoUsuario = clean_input_db($conexion, $_POST['apodoUsuario'] ?? '');
+$descripcionUsuario = clean_input_db($conexion, $_POST['descripcionUsuario'] ?? '');
+$correoUsuario = clean_input_db($conexion, $_POST['correoUsuario'] ?? '');
+$new_password = $_POST['new_password'] ?? '';
+$confirm_new_password = $_POST['confirm_new_password'] ?? '';
+$selected_history_avatar_id = (int)($_POST['selected_history_avatar_id'] ?? 0);
+
+// validaciones básicas
+if ($nombreUsuario === '' || $apellidoUsuario === '' || $arrobaUsuario === '' || $correoUsuario === '') {
+    $errors[] = "Nombre, apellido, arroba y correo son obligatorios.";
+}
+if ($correoUsuario !== '' && !filter_var($correoUsuario, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = "El correo no tiene formato válido.";
+}
+if ($new_password !== '' && $new_password !== $confirm_new_password) {
+    $errors[] = "La nueva contraseña y su confirmación no coinciden.";
+}
+if ($new_password !== '' && strlen($new_password) < 6) {
+    $errors[] = "La contraseña debe tener al menos 6 caracteres.";
+}
+
+// si hay errores, guardarlos y volver al formulario
+if (!empty($errors)) {
+    $_SESSION['errors'] = $errors;
+    $_SESSION['form_data'] = $_POST;
+    header('Location: editarPerfil.php');
     exit;
 }
 
-require_once '../../config/conexion.php';
-$conexion = abrirConexion();
+// Empezar transacción
+$conexion->begin_transaction();
 
-$userId = (int)$_SESSION['usuario']['id'];
-
-$uploadDir = '../../public/uploads/avatars/';
-
-$updateAvatarSql = "";
-$newAvatarId = (int)($_POST['selected_history_avatar_id'] ?? 0); 
-$currentAvatarId = (int)($_POST['old_avatar_id'] ?? 0); 
-
-// -------------------------------------------------------------
-// --- 1. PROCESAR CAMBIO DE AVATAR (Subida o Historial) ---
-// -------------------------------------------------------------
-
-// A. Si se subió un nuevo archivo
-if (isset($_FILES['new_avatar']) && $_FILES['new_avatar']['error'] === UPLOAD_ERR_OK) {
-    $file = $_FILES['new_avatar'];
-    $fileExt = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $fileName = uniqid("avatar_") . '.' . $fileExt;
-    $destination = $uploadDir . $fileName;
-
-    if (move_uploaded_file($file['tmp_name'], $destination)) {
-        $dbPath = $destination; 
-
-        // Insertar el nuevo registro en la tabla fotosdeperfil
-        // **CORRECCIÓN 2: Usamos 'idUsuario'**
-        $insertPhotoSql = $conexion->prepare("INSERT INTO fotosdeperfil (idUsuario, imagenPerfil) VALUES (?, ?)");
-        
-        // Si esta línea sigue fallando con error "Unknown column...", 
-        // ¡debes cambiar 'idUsuario' por el nombre real de tu columna!
-        
-        $insertPhotoSql->bind_param("is", $userId, $dbPath);
-        $insertPhotoSql->execute();
-        $newAvatarId = $conexion->insert_id;
-    }
-}
-// B. Si se seleccionó una foto del historial
-elseif ($newAvatarId > 0 && $newAvatarId !== $currentAvatarId) {
-    // Ya tenemos el $newAvatarId listo para usarse.
-}
-else {
+try {
+    // 2) Procesar subida de avatar (si subieron)
     $newAvatarId = 0;
-}
+    if (!empty($_FILES['new_avatar']) && $_FILES['new_avatar']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $file = $_FILES['new_avatar'];
+        if ($file['error'] !== UPLOAD_ERR_OK) throw new Exception("Error subiendo la imagen (code {$file['error']}).");
 
-// Construir la parte de la consulta SQL para el avatar si hay un cambio
-if ($newAvatarId > 0 && $newAvatarId !== $currentAvatarId) {
-    $updateAvatarSql = "idFotoPerfilUsuario = ?, ";
-    $_SESSION['usuario']['idFotoPerfilUsuario'] = $newAvatarId;
-}
+        // validaciones
+        $maxSize = 2 * 1024 * 1024; // 2MB
+        if ($file['size'] > $maxSize) throw new Exception("La imagen no puede superar 2MB.");
 
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        $mimeMap = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp','image/gif'=>'gif'];
+        if (!isset($mimeMap[$mime])) throw new Exception("Formato de imagen no permitido.");
 
-// -------------------------------------------------------------
-// --- 2. PROCESAR DATOS DEL PERFIL Y CONTRASEÑA ---
-// -------------------------------------------------------------
+        $ext = $mimeMap[$mime];
+        $newName = 'avatar_' . $userId . '_' . time() . '.' . $ext;
 
-$fields = [];
-$values = [];
-$types = ''; 
+        // directorio real en servidor (proyecto_root/public/uploads/avatars/)
+        $uploadDir = dirname(__DIR__, 2) . '/public/uploads/avatars/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
 
-$data = [
-    'arrobaUsuario'     => $_POST['arrobaUsuario'] ?? '',
-    'apodoUsuario'      => $_POST['apodoUsuario'] ?? '',
-    'nombreUsuario'     => $_POST['nombreUsuario'] ?? '',
-    'apellidoUsuario'   => $_POST['apellidoUsuario'] ?? '',
-    'descripcionUsuario'=> $_POST['descripcionUsuario'] ?? '',
-    'contactoUsuario'   => (int)($_POST['contactoUsuario'] ?? 0), 
-    'correoUsuario'     => $_POST['correoUsuario'] ?? '',
-];
-
-foreach ($data as $key => $value) {
-    $fields[] = "{$key} = ?";
-    if ($key === 'contactoUsuario') {
-        $types .= 'i';
-        $values[] = $value;
-    } else {
-        $types .= 's';
-        $values[] = $value;
-    }
-}
-
-// PROCESAR CONTRASEÑA
-$newPassword = $_POST['new_password'] ?? '';
-$confirmPassword = $_POST['confirm_new_password'] ?? '';
-
-if (!empty($newPassword) && $newPassword === $confirmPassword) {
-    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-    $fields[] = "contrasenaUsuario = ?";
-    $values[] = $hashedPassword;
-    $types .= 's';
-}
-
-
-// -------------------------------------------------------------
-// --- 3. EJECUTAR LA CONSULTA FINAL ---
-// -------------------------------------------------------------
-
-if (!empty($fields) || !empty($updateAvatarSql)) {
-    
-    if (!empty($updateAvatarSql)) {
-        array_unshift($values, $newAvatarId); 
-        $types = 'i' . $types;               
-    }
-
-    $values[] = $userId;
-    $types .= 'i';
-
-    $setClauses = array_merge((!empty($updateAvatarSql) ? [substr($updateAvatarSql, 0, -2)] : []), $fields);
-    
-    $sql = "UPDATE usuario SET " . implode(', ', $setClauses) . " WHERE idUsuario = ?";
-
-    $stmt = $conexion->prepare($sql);
-
-    if ($stmt) {
-        $bind_params = array_merge([$types], $values);
-        $refs = [];
-        foreach($bind_params as $key => $value) {
-            $refs[$key] = &$bind_params[$key];
+        $targetPath = $uploadDir . $newName;
+        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+            throw new Exception("No se pudo mover el archivo subido.");
         }
 
-        call_user_func_array([$stmt, 'bind_param'], $refs);
-        
-        $stmt->execute();
-        $stmt->close();
-
-    } else {
-        error_log("Error al preparar la consulta: " . $conexion->error);
+        // insertar en fotosdeperfil (guardamos imagen y idUsuario para historial)
+        $ins = $conexion->prepare("INSERT INTO fotosdeperfil (imagenPerfil, idUsuario) VALUES (?, ?)");
+        if (!$ins) throw new Exception("Error preparar insert foto: " . $conexion->error);
+        $ins->bind_param("si", $newName, $userId);
+        if (!$ins->execute()) throw new Exception("Error insert foto: " . $ins->error);
+        $newAvatarId = (int)$ins->insert_id;
+        $ins->close();
     }
+
+    // 2b) Si seleccionó historial, prevalece sobre nueva subida
+    if ($selected_history_avatar_id > 0) {
+        $newAvatarId = $selected_history_avatar_id;
+    }
+
+    // 3) Preparar update dinámico con prepared statement
+    $fields = [
+        'nombreUsuario' => $nombreUsuario,
+        'apellidoUsuario' => $apellidoUsuario,
+        'arrobaUsuario' => $arrobaUsuario,
+        'apodoUsuario' => $apodoUsuario,
+        'descripcionUsuario' => $descripcionUsuario,
+        'correoUsuario' => $correoUsuario,
+    ];
+
+    if ($newAvatarId > 0) {
+        $fields['idFotoPerfilUsuario'] = $newAvatarId;
+    }
+
+    if ($new_password !== '') {
+        $hashed = password_hash($new_password, PASSWORD_DEFAULT);
+        $fields['contrasenaUsuario'] = $hashed;
+    }
+
+    // construir SQL (NO usamos columnas que no existen)
+    $setParts = [];
+    $types = '';
+    $values = [];
+    foreach ($fields as $col => $val) {
+        $setParts[] = "`$col` = ?";
+        if ($col === 'idFotoPerfilUsuario') {
+            $types .= 'i';
+            $values[] = (int)$val;
+        } else {
+            $types .= 's';
+            $values[] = (string)$val;
+        }
+    }
+
+    $sql = "UPDATE usuario SET " . implode(', ', $setParts) . " WHERE idUsuario = ?";
+    $types .= 'i';
+    $values[] = $userId;
+
+    // preparar y bind dinámico (creamos referencias)
+    $stmt = $conexion->prepare($sql);
+    if (!$stmt) throw new Exception("Error preparar update usuario: " . $conexion->error);
+
+    // preparar array params (primer elemento: tipos, luego valores)
+    $params = array_merge([$types], $values);
+    // crear referencias necesarias para call_user_func_array
+    $refs = [];
+    foreach ($params as $i => $v) {
+        $refs[$i] = &$params[$i];
+    }
+    call_user_func_array([$stmt, 'bind_param'], $refs);
+
+    if (!$stmt->execute()) throw new Exception("Error ejecutando update usuario: " . $stmt->error);
+    $stmt->close();
+
+    $conexion->commit();
+
+    // actualizar sesión mínima
+    $_SESSION['usuario']['nombre'] = $nombreUsuario;
+    $_SESSION['usuario']['apodo'] = $apodoUsuario;
+
+    $_SESSION['message'] = "Perfil actualizado correctamente.";
+    header("Location: perfil.php?id={$userId}");
+    exit;
+
+} catch (Exception $ex) {
+    $conexion->rollback();
+    $_SESSION['errors'] = [ $ex->getMessage() ];
+    $_SESSION['form_data'] = $_POST;
+    header('Location: editarPerfil.php');
+    exit;
 }
-
-$conexion->close();
-
-header("Location: perfil.php?id={$userId}");
-exit;

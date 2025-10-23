@@ -1,3 +1,5 @@
+/* nav.css */
+
 .btn-blanco-negro {
   background-color: #fffffd;
   color: #999999;
@@ -17,8 +19,18 @@
   border: 1px solid #424242;
 }
 
+/* CORRECCIÓN: Controla el ancho del contenedor de búsqueda */
 .busqueda-wrapper {
-  width: 100%;
+  width: 100%; 
+}
+
+/* Limita el ancho solo en desktop y lo centra */
+@media (min-width: 992px) { 
+    .busqueda-wrapper {
+        max-width: 600px; 
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
 
 .buscador {
@@ -34,5 +46,4 @@
 .follow-btn:hover{
   box-shadow: inset 0 0 0 2px #ff7f45;
   color: #ff7f45 !important;
-
 }

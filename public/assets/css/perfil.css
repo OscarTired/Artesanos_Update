@@ -1,7 +1,42 @@
-.avatar-perfil {
-  width: 120px;
-  height: 120px;
+/* botón redondo (contacto) */
+.btn-contact-circle {
+  background-color: #22c55e;
+  color: #fff;
+  border: none;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ccc;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  margin-right: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.btn-contact-circle:hover {
+  background-color: #1a9d4a;
+  color: #fff;
+}
+
+/* contenedor que agrupa: contacto (izq) + columna de botones (der) */
+.box-buttons-container {
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-end; /* en desktop lo ponemos a la derecha del todo */
+  gap: 12px;
+}
+
+/* la columna de Editar/Cerrar (vertical) */
+.action-buttons {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:flex-end; /* que los botones queden alineados a la derecha dentro de la columna */
+}
+
+/* versión responsive: en pantallas pequeñas se centran y se apilan */
+@media (max-width: 992px) {
+  .box-buttons-container { justify-content:center; gap:10px; flex-wrap:wrap; }
+  .action-buttons { align-items:center; }
 }
