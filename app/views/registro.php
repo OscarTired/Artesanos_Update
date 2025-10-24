@@ -103,33 +103,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <h5>Artesanos</h5>
   <p>¡Necesitás una cuenta para seguir viendo!</p>
 
-  <?php if ($serverMessage): ?>
-    <div class="alert alert-<?php echo $serverMessageType; ?>">
-      <?php echo $serverMessage; ?>
-    </div>
-    <?php echo $redirScript ?? ''; ?>
+  <?php if (!empty($serverMessage)): ?>
+  <div class="alert alert-<?php echo $serverMessageType; ?> text-center mt-3" role="alert">
+    <?php echo htmlspecialchars($serverMessage); ?>
+  </div>
+  <?php echo $redirScript ?? ''; ?>
   <?php endif; ?>
 
   <div class="register-box">
-    <form action="registro.php" method="POST" id="registroForm" novalidate>
+    <form action="" method="POST" id="registroForm" novalidate>
       <div class="form-row">
         <div class="form-group">
-          <input type="text" class="form-control" name="nombre" placeholder="Nombre" required>
+          <input type="text" class="form-control" name="nombre" placeholder="Nombre" value="<?php echo htmlspecialchars($nombre ?? '') ?>" required>
           <small class="error-text"></small>
         </div>
         <div class="form-group">
-          <input type="text" class="form-control" name="apellido" placeholder="Apellido" required>
+          <input type="text" class="form-control" name="apellido" placeholder="Apellido" value="<?php echo htmlspecialchars($apellido ?? '') ?>" required>
           <small class="error-text"></small>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <input type="text" class="form-control" name="usuario" placeholder="@usuario" required>
+          <input type="text" class="form-control" name="usuario" placeholder="@usuario" value="<?php echo htmlspecialchars($usuario ?? '') ?>" required>
           <small class="error-text"></small>
         </div>
         <div class="form-group">
-          <input type="text" class="form-control" name="apodo" placeholder="Apodo" required>
+          <input type="text" class="form-control" name="apodo" placeholder="Apodo" value="<?php echo htmlspecialchars($apodo ?? '') ?>" required>
           <small class="error-text"></small>
         </div>
       </div>
@@ -161,7 +161,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </div>
 
       <div class="form-single form-group">
-        <input type="email" class="form-control" name="email" placeholder="Correo electrónico" required>
+        <input type="email" class="form-control" name="email" placeholder="Correo electrónico" value="<?php echo htmlspecialchars($email ?? '') ?>" required>
         <small class="error-text"></small>
       </div>
 

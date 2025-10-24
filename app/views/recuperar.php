@@ -28,7 +28,31 @@ cerrarConexion($conexion);
   <meta charset="UTF-8">
   <title>Recuperar contraseña</title>
   <style>
-   body { font-family: Arial; text-align:center; margin-top:80px; } form { display:inline-block; padding:20px; border:1px solid #ccc; border-radius:10px; } input { padding:10px; width:250px; margin-bottom:10px; } button { padding:10px 20px; background:orange; color:white; border:none; border-radius:5px; cursor:pointer; } </style>
+   body { 
+    font-family: Arial; 
+   text-align:center; 
+   margin-top:80px; 
+   } 
+   form { 
+    display:inline-block; 
+    padding:20px; 
+    border:none; 
+    border-radius:10px; 
+    } 
+    input {
+    padding:10px; 
+    width:250px; 
+    margin-bottom:10px;
+    } 
+    button { 
+    padding:10px 20px; 
+    background:orange; 
+    color:white; 
+    border:none; 
+    border-radius:5px; 
+    cursor:pointer; 
+    }
+  
   </style>
 </head>
 <body>

@@ -46,15 +46,15 @@ cerrarConexion($conexion);
       font-family: Arial, sans-serif;
       text-align: center;
       margin-top: 80px;
-      background-color: #fafafa;
+      background-color: white;
     }
     form {
       display: inline-block;
       padding: 25px 30px;
-      border: 1px solid #ccc;
+      border: none;
       border-radius: 10px;
       background: #fff;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: none;
     }
     input {
       padding: 10px;
