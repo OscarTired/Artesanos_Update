@@ -40,7 +40,8 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
           echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 album-item">
               
               <div class="card-body">
-              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="/Artesanos/public/uploads/portadas/' . $a->urlPortada . '"/>
+              <a href="" class="abrir-modal-album" data-id="' . $a->idAlbum . '" data-bs-toggle="modal" data-bs-target="#modalDetalleAlbum">
+              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="/Artesanos/public/uploads/portadas/' . $a->urlPortada . '"/></a>
 
               <div class="d-flex justify-content-between align-items-center">
               <h5 class="card-title mb-0">' . $a->tituloAlbum . '</h5>
@@ -66,6 +67,30 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
       ?>
     </div>
   </div>
+  <!-- detalle de album-->
+<div class="modal fade" id="modalDetalleAlbum" tabindex="-1" aria-labelledby="modalDetalleAlbumLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content p-4">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalDetalleAlbumLabel">Detalle del álbum</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-9" id="detalleAlbumIzquierda">
+           <!--aca va el carrusel de las imagenes etc -->
+           en construccion
+          </div>
+
+          <div class="col-lg-3" id="detalleAlbumDerecha">
+            <!--aca va el perfil -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
   <?php if ($idUsuario == 0): include 'registro.php';
   else: ?>

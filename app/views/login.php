@@ -127,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <div class="button-row">
           <button type="submit" class="btn btn-main w-100 mb-2">Iniciar sesión</button>
-          <button type="button" class="btn btn-outline w-100" onclick="window.location.href='registro.php'">Quiero registrarme</button>
+          <button type="button" class="btn btn-outline w-100" onclick="window.location.href='home.php#registro'">Quiero registrarme</button>
         </div>
       </form>
     </div>
