@@ -8,6 +8,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // Incluir conexión (ruta CORREGIDA y robusta)
 require_once dirname(__DIR__, 2) . '/config/conexion.php';
 
+// Incluir helper de usuario
+require_once dirname(__DIR__) . '/models/usuarioHelper.php';
+
 // Helper de escape
 function e($s){
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -42,10 +45,11 @@ $isOwner = (isset($_SESSION['usuario']['id']) && (int)$_SESSION['usuario']['id']
 
 // Consulta de datos del usuario
 $sqlUser = "
-    SELECT 
-        u.idUsuario, u.arrobaUsuario, u.apodoUsuario, u.nombreUsuario, 
-        u.apellidoUsuario, u.descripcionUsuario, u.contactoUsuario,
-        fp.imagenPerfil
+    SELECT
+    u.idUsuario, u.arrobaUsuario, u.apodoUsuario, u.nombreUsuario,
+    u.apellidoUsuario, u.descripcionUsuario, u.contactoUsuario,
+    u.correoUsuario,
+    fp.imagenPerfil
     FROM usuario u
     LEFT JOIN fotosdeperfil fp ON fp.idFotoPerfil = u.idFotoPerfilUsuario
     WHERE u.idUsuario = ? LIMIT 1
@@ -68,17 +72,8 @@ if (!$userData) {
     exit("Usuario no encontrado.");
 }
 
-// Avatar: si imagenPerfil es URL completa la usamos, si es nombre local la apuntamos, sino imagen por defecto
-$avatarRaw = $userData['imagenPerfil'] ?? '';
-if ($avatarRaw) {
-    if (preg_match("/^https?:\/\//i", $avatarRaw)) {
-        $avatarUrl = $avatarRaw;
-    } else {
-        $avatarUrl = '../../public/uploads/avatars/' . e($avatarRaw);
-    }
-} else {
-    $avatarUrl = '../../public/assets/images/imagen.png';
-}
+// Avatar con helper
+$avatarUrl = obtenerAvatar($perfilId);
 
 // Consulta de álbumes
 $sqlAlbums = "
@@ -140,12 +135,14 @@ if (!$isOwner && isset($_SESSION['usuario']['id'])) {
 
 $conexion->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Perfil de <?= e($userData['nombreUsuario']) . ' ' . e($userData['apellidoUsuario']) ?></title>
+    <title>Artesanos</title>
+    <link rel="icon" href="../../public/assets/images/logo.png" type="image/x-icon">
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -206,7 +203,10 @@ $conexion->close();
         </div>
 
         <div class="box">
-            <p class="descripcion mb-0"><?= e($userData['descripcionUsuario'] ?: 'Sin descripción.') ?></p>
+            <p class="descripcion mb-0" style="white-space: pre-line;">
+    <?= htmlspecialchars(str_replace(["\\r\\n", "\\n", "\\r"], "\n", $userData['descripcionUsuario'] ?: 'Sin descripción.')) ?>
+</p>
+
         </div>
 
         <div class="box">
@@ -303,22 +303,30 @@ $conexion->close();
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Contacto de <?= e($userData['nombreUsuario']) . ' ' . e($userData['apellidoUsuario']) ?></h5>
+                <h5 class="modal-title">
+                    Contacto de <?= e($userData['apodoUsuario']) ?>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <p><strong>Nombre:</strong> <?= e($userData['nombreUsuario']) . ' ' . e($userData['apellidoUsuario']) ?></p>
-                <p><strong>Email / Contacto:</strong> <?= e($userData['contactoUsuario'] ?: 'No disponible') ?></p>
+                <p><strong>Email de contacto:</strong> <?= e($userData['correoUsuario']) ?></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <?php if (!empty($userData['contactoUsuario'])): ?>
-                    <a href="mailto:<?= e($userData['contactoUsuario']) ?>" class="btn btn-primary">Enviar email</a>
-                <?php endif; ?>
+                <a 
+                    href="https://mail.google.com/mail/?view=cm&to=<?= urlencode($userData['correoUsuario']) ?>" 
+                    target="_blank" 
+                    class="btn btn-success d-flex align-items-center justify-content-center"
+                >
+                    <i class="bi bi-envelope-fill me-2"></i> Enviar email
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
