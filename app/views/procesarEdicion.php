@@ -3,7 +3,8 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (!isset($_SESSION['usuario']['id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: login.php'); exit;
+    header('Location: login.php');
+    exit;
 }
 
 // conexión (subir 2 niveles hasta la raíz del proyecto)
@@ -17,7 +18,8 @@ $userId = (int)$_SESSION['usuario']['id'];
 $errors = [];
 
 // Helper
-function clean_input_db($conexion, $value) {
+function clean_input_db($conexion, $value)
+{
     return mysqli_real_escape_string($conexion, trim((string)$value));
 }
 
@@ -28,6 +30,8 @@ $arrobaUsuario = clean_input_db($conexion, $_POST['arrobaUsuario'] ?? '');
 $apodoUsuario = clean_input_db($conexion, $_POST['apodoUsuario'] ?? '');
 $descripcionUsuario = clean_input_db($conexion, $_POST['descripcionUsuario'] ?? '');
 $correoUsuario = clean_input_db($conexion, $_POST['correoUsuario'] ?? '');
+$privacidadUsuario = clean_input_db($conexion, $_POST['privacidadUsuario'] ?? 'publico');
+
 $new_password = $_POST['new_password'] ?? '';
 $confirm_new_password = $_POST['confirm_new_password'] ?? '';
 $selected_history_avatar_id = (int)($_POST['selected_history_avatar_id'] ?? 0);
@@ -70,7 +74,7 @@ try {
 
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($file['tmp_name']);
-        $mimeMap = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp','image/gif'=>'gif'];
+        $mimeMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
         if (!isset($mimeMap[$mime])) throw new Exception("Formato de imagen no permitido.");
 
         $ext = $mimeMap[$mime];
@@ -122,6 +126,7 @@ try {
         'apodoUsuario' => $apodoUsuario,
         'descripcionUsuario' => $descripcionUsuario,
         'correoUsuario' => $correoUsuario,
+        'privacidadUsuario' => $privacidadUsuario,
     ];
 
     if ($newAvatarId > 0) {
@@ -173,14 +178,15 @@ try {
     // actualizar sesión mínima
     $_SESSION['usuario']['nombre'] = $nombreUsuario;
     $_SESSION['usuario']['apodo'] = $apodoUsuario;
+    $_SESSION['usuario']['privacidad'] = $privacidadUsuario;
+
 
     $_SESSION['message'] = "Perfil actualizado correctamente.";
     header("Location: perfil.php?id={$userId}");
     exit;
-
 } catch (Exception $ex) {
     $conexion->rollback();
-    $_SESSION['errors'] = [ $ex->getMessage() ];
+    $_SESSION['errors'] = [$ex->getMessage()];
     $_SESSION['form_data'] = $_POST;
     header('Location: editarPerfil.php');
     exit;
