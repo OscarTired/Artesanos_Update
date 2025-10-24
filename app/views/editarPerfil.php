@@ -129,7 +129,8 @@ unset($_SESSION['errors'], $_SESSION['form_data']);
 
                 <div class="mb-3">
                     <label class="form-label">Descripción / Biografía</label>
-                    <textarea name="descripcionUsuario" class="form-control" rows="3"><?= e($form_data['descripcionUsuario'] ?? $userData['descripcionUsuario']) ?></textarea>
+                    <textarea name="descripcionUsuario" class="form-control"><?= htmlspecialchars(str_replace(["\\r\\n", "\\n", "\\r"], "\n", $userData['descripcionUsuario'])) ?></textarea>
+
                 </div>
 
                 <div class="mb-3 row">
