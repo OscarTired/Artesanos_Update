@@ -79,6 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <title>Iniciar Sesión | Artesanos</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
   <link rel="stylesheet" href="../../public/assets/css/re.css">
 </head>
 
@@ -104,18 +106,110 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <input type="text" class="form-control" name="usuario" placeholder="@usuario" required>
           <small class="error-text"></small>
         </div>
-        <div class="form-group mb-3">
-          <input type="password" class="form-control" name="password" placeholder="Contraseña" required minlength="6">
+        <div class="form-group password-wrapper">
+          <input type="password" 
+            class="form-control" 
+            name="password" 
+            id="password" 
+            placeholder="Contraseña" 
+            required 
+            minlength="6">
+          <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
           <small class="error-text"></small>
+        </div>
+
+        <div class="text-start mb-3">
+          <a href="#" class="forgot-link" data-bs-toggle="modal" data-bs-target="#modalRecuperar">
+            ¿Olvidaste tu contraseña?
+          </a>
         </div>
 
         <div class="button-row">
           <button type="submit" class="btn btn-main w-100 mb-2">Iniciar sesión</button>
-          <button type="button" class="btn btn-outline w-100" onclick="window.location.href='home.php'">Quiero registrarme</button>
+          <button type="button" class="btn btn-outline w-100" onclick="window.location.href='registro.php'">Quiero registrarme</button>
         </div>
       </form>
     </div>
   </div>
+
+ <!-- Modal Recuperar Contraseña -->
+<div class="modal" id="modalRecuperar" tabindex="-1" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4" style="pointer-events: auto;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100 text-center">Recuperar contraseña</h5>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="recuperar.php">
+          <input id="correoRecuperar" type="email" class="form-control mb-3" name="correo" placeholder="Ingresá tu correo" required>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-warning">Enviar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("registroForm");
+    const inputs = form.querySelectorAll(".form-control");
+
+    inputs.forEach(input => {
+      input.addEventListener("input", () => validarCampo(input));
+    });
+
+    form.addEventListener("submit", e => {
+      let valido = true;
+      inputs.forEach(input => {
+        if (!validarCampo(input)) valido = false;
+      });
+      if (!valido) e.preventDefault();
+    });
+
+    function validarCampo(input) {
+      const errorText = input.parentElement.querySelector(".error-text");
+      let valido = true;
+      let mensaje = "";
+
+      if (input.name === "usuario" && input.value.trim().length < 3) {
+        valido = false;
+        mensaje = "El usuario debe tener al menos 3 caracteres.";
+      } else if (input.name === "password" && input.value.length < 6) {
+        valido = false;
+        mensaje = "La contraseña debe tener al menos 6 caracteres.";
+      }
+
+      if (!valido) {
+        input.classList.remove("is-valid");
+        input.classList.add("is-invalid");
+        errorText.textContent = mensaje;
+      } else {
+        input.classList.remove("is-invalid");
+        input.classList.add("is-valid");
+        errorText.textContent = "";
+      }
+      return valido;
+    }
+  });
+  </script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+  const togglePassword = document.getElementById("togglePassword");
+  const passwordField = document.getElementById("password");
+
+  togglePassword.addEventListener("click", () => {
+    const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+    passwordField.setAttribute("type", type);
+    togglePassword.classList.toggle("bi-eye");
+    togglePassword.classList.toggle("bi-eye-slash");
+  });
+  });
+  </script>
+  
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
