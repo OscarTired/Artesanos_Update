@@ -140,12 +140,14 @@ if (!$isOwner && isset($_SESSION['usuario']['id'])) {
 
 $conexion->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Perfil de <?= e($userData['nombreUsuario']) . ' ' . e($userData['apellidoUsuario']) ?></title>
+    <title>Perfil de <?= e($userData['apodoUsuario'])?></title>
+    <link rel="icon" href="../../public/assets/images/logo.png" type="image/x-icon">
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
