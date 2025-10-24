@@ -44,12 +44,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
             </button>
 
             <?php
-              // 📷 Determinar imagen de perfil
-              if (!empty($_SESSION['usuario']['avatar'])) {
-                $avatarSrc = '../../public/uploads/avatars/' . htmlspecialchars($_SESSION['usuario']['avatar']);
-              } else {
-                $avatarSrc = '../../public/assets/images/imagen.png';
-              }
+              // 📦 Incluir helper y obtener avatar
+              require_once dirname(__DIR__) . '/models/usuarioHelper.php';
+              $avatarSrc = obtenerAvatar((int)$_SESSION['usuario']['id']);
             ?>
 
             <a href="perfil.php?id=<?= (int)$_SESSION['usuario']['id'] ?>" class="d-inline-block">

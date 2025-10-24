@@ -92,11 +92,26 @@ try {
         if (!$ins->execute()) throw new Exception("Error insert foto: " . $ins->error);
         $newAvatarId = (int)$ins->insert_id;
         $ins->close();
+
+        // 🟢 Actualizar la sesión inmediatamente si el usuario actualizó su propio avatar
+        if (isset($_SESSION['usuario']) && $_SESSION['usuario']['id'] == $userId) {
+            $_SESSION['usuario']['avatar'] = $newName;
+        }
     }
 
     // 2b) Si seleccionó historial, prevalece sobre nueva subida
     if ($selected_history_avatar_id > 0) {
         $newAvatarId = $selected_history_avatar_id;
+
+        // 🟢 También actualizamos la sesión con la imagen del historial
+        $stmtFoto = $conexion->prepare("SELECT imagenPerfil FROM fotosdeperfil WHERE idFotoPerfil = ? AND idUsuario = ?");
+        $stmtFoto->bind_param("ii", $selected_history_avatar_id, $userId);
+        $stmtFoto->execute();
+        $resFoto = $stmtFoto->get_result();
+        if ($resFoto && $rowFoto = $resFoto->fetch_assoc()) {
+            $_SESSION['usuario']['avatar'] = $rowFoto['imagenPerfil'];
+        }
+        $stmtFoto->close();
     }
 
     // 3) Preparar update dinámico con prepared statement

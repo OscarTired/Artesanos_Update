@@ -8,6 +8,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // Incluir conexión (ruta CORREGIDA y robusta)
 require_once dirname(__DIR__, 2) . '/config/conexion.php';
 
+// Incluir helper de usuario
+require_once dirname(__DIR__) . '/models/usuarioHelper.php';
+
 // Helper de escape
 function e($s){
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -68,17 +71,8 @@ if (!$userData) {
     exit("Usuario no encontrado.");
 }
 
-// Avatar: si imagenPerfil es URL completa la usamos, si es nombre local la apuntamos, sino imagen por defecto
-$avatarRaw = $userData['imagenPerfil'] ?? '';
-if ($avatarRaw) {
-    if (preg_match("/^https?:\/\//i", $avatarRaw)) {
-        $avatarUrl = $avatarRaw;
-    } else {
-        $avatarUrl = '../../public/uploads/avatars/' . e($avatarRaw);
-    }
-} else {
-    $avatarUrl = '../../public/assets/images/imagen.png';
-}
+// Avatar con helper
+$avatarUrl = obtenerAvatar($perfilId);
 
 // Consulta de álbumes
 $sqlAlbums = "
@@ -208,7 +202,10 @@ $conexion->close();
         </div>
 
         <div class="box">
-            <p class="descripcion mb-0"><?= e($userData['descripcionUsuario'] ?: 'Sin descripción.') ?></p>
+            <p class="descripcion mb-0" style="white-space: pre-line;">
+    <?= htmlspecialchars(str_replace(["\\r\\n", "\\n", "\\r"], "\n", $userData['descripcionUsuario'] ?: 'Sin descripción.')) ?>
+</p>
+
         </div>
 
         <div class="box">
