@@ -1,3 +1,33 @@
+//funcion para el boton de cargar mas albumes
+document.addEventListener("DOMContentLoaded", function () {
+  let albums = document.querySelectorAll(".album-item");
+  let loadMoreBtn = document.getElementById("loadMore");
+
+  let itemsPerPage = 20; 
+  let currentItems = itemsPerPage;
+
+  // ocultar todos menos los primeros 20
+  albums.forEach((album, index) => {
+    if (index >= currentItems) album.style.display = "none";
+  });
+
+  loadMoreBtn.addEventListener("click", () => {
+    for (let i = currentItems; i < currentItems + itemsPerPage; i++) {
+      if (albums[i]) albums[i].style.display = "block";
+    }
+    currentItems += itemsPerPage;
+
+    if (currentItems >= albums.length) {
+      loadMoreBtn.style.display = "none";
+    }
+  });
+
+  if (albums.length <= itemsPerPage) {
+    loadMoreBtn.style.display = "none";
+  }
+});
+
+
 //cambia de "pagina" dentro del formulario
 function mostrarSigForm() {
   //primero valida que los datos del album esten bien
