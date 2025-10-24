@@ -146,7 +146,7 @@ $conexion->close();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Perfil de <?= e($userData['apodoUsuario'])?></title>
+    <title>Artesanos</title>
     <link rel="icon" href="../../public/assets/images/logo.png" type="image/x-icon">
 
     <!-- Bootstrap -->
