@@ -14,13 +14,12 @@ require_once '../models/imagen.php';
 
 $controlador = new AlbumCont();
 
-/* if (!isset($_SESSION['idUsuario'])) {
+ if (!isset($_SESSION['usuario']['id'])) {
   echo json_encode(["exito" => false, "mensaje" => "Sesión no iniciada"]);
   exit;
-} */
+} 
 
-$album = new Album($_POST['tituloAlbum'], isset($_POST['esPublico']) ? intval($_POST['esPublico']) : 1, guardarArchivo($_FILES['portada'], 'portadas'), 1);
-//cuando este sesiones $album = new Album($_POST['tituloAlbum'], isset($_POST['esPublico']) ? intval($_POST['esPublico']) : 1, guardarArchivo($_FILES['portada'], 'portadas'), $_SESSION['idUsuario']);
+$album = new Album($_POST['tituloAlbum'], isset($_POST['esPublico']) ? intval($_POST['esPublico']) : 1, guardarArchivo($_FILES['portada'], 'portadas'), $_SESSION['usuario']['id']);
 $idAlbum = $controlador->crearAlbum($album);
 
 if (!$idAlbum) {
