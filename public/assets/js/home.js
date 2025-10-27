@@ -1,3 +1,68 @@
+function tiempoRelativo(fech) {
+  let fecha = new Date(fech);
+  let ahora = new Date();
+  let diffMs = ahora - fecha;
+  let diffSeg = Math.floor(diffMs / 1000);
+  let diffMin = Math.floor(diffSeg / 60);
+  let diffHoras = Math.floor(diffMin / 60);
+  let diffDias = Math.floor(diffHoras / 24);
+
+  if (diffSeg < 60) return `hace ${diffSeg} segundos`;
+  if (diffMin < 60) return `hace ${diffMin} minutos`;
+  if (diffHoras < 24) return `hace ${diffHoras} horas`;
+  if (diffDias === 1) return `ayer`;
+  return `hace ${diffDias} días`;
+}
+
+//carga el detalle del album en el modal
+document.querySelectorAll(".abrir-modal-album").forEach((el) => {
+  el.addEventListener("click", function () {
+    let idAlbum = this.getAttribute("data-id");
+
+    fetch(`/Artesanos/app/controllers/detalleAlbum.php?id=${idAlbum}`)
+      .then((res) => res.json())
+      .then((data) => {
+        let fechaRelativa = tiempoRelativo(data.fecha);
+
+        //datos del usuario
+        document.getElementById("modalDetalleAlbumLabel").innerHTML = `
+        <div class="d-flex flex-column">
+          <div class="d-flex align-items-center gap-2">
+            <h4 class="mb-0"><strong>${data.apodo}</strong></h4>
+            <div class="text-muted fw-light"><small> - @${data.usuario}</small></div>
+          </div>
+          <div class="text-muted mt-1 fw-light" style="font-size: 0.9rem;">${fechaRelativa}</div>
+        </div>
+        `;
+
+        document.getElementById("modalFotoPerfil").src = data.fotoPerfil;
+        document
+          .getElementById("btnSeguir")
+          .setAttribute("data-id", data.idUsuario);
+
+        document.getElementById("detalleAlbumIzquierda").innerHTML =
+          data.izquierda;
+        document.getElementById("detalleAlbumDerecha").innerHTML = data.derecha;
+
+        //cambia la info de la imagen al cambiar de slide
+        let carrusel = document.getElementById("carouselAlbum");
+        function actualizarInfoImagen() {
+          let activo = carrusel.querySelector(".carousel-item.active");
+          let titulo = activo.getAttribute("data-titulo") || "";
+          let descripcion = activo.getAttribute("data-descripcion") || "";
+
+          document.getElementById("tituloImagen").textContent = titulo;
+          document.getElementById("descripcionImagen").textContent =
+            descripcion;
+        }
+
+        actualizarInfoImagen();
+
+        carrusel.addEventListener("slid.bs.carousel", actualizarInfoImagen);
+      });
+  });
+});
+
 //funcion para el boton de cargar mas albumes
 document.addEventListener("DOMContentLoaded", function () {
   let albums = document.querySelectorAll(".album-item");
@@ -327,67 +392,3 @@ document.getElementById("btnCrear").addEventListener("click", function (e) {
     });
 });
 
-function tiempoRelativo(fech) {
-  let fecha = new Date(fech);
-  let ahora = new Date();
-  let diffMs = ahora - fecha;
-  let diffSeg = Math.floor(diffMs / 1000);
-  let diffMin = Math.floor(diffSeg / 60);
-  let diffHoras = Math.floor(diffMin / 60);
-  let diffDias = Math.floor(diffHoras / 24);
-
-  if (diffSeg < 60) return `hace ${diffSeg} segundos`;
-  if (diffMin < 60) return `hace ${diffMin} minutos`;
-  if (diffHoras < 24) return `hace ${diffHoras} horas`;
-  if (diffDias === 1) return `ayer`;
-  return `hace ${diffDias} días`;
-}
-
-//carga el detalle del album en el modal
-document.querySelectorAll(".abrir-modal-album").forEach((el) => {
-  el.addEventListener("click", function () {
-    let idAlbum = this.getAttribute("data-id");
-
-    fetch(`/Artesanos/app/controllers/detalleAlbum.php?id=${idAlbum}`)
-      .then((res) => res.json())
-      .then((data) => {
-        let fechaRelativa = tiempoRelativo(data.fecha);
-
-        //datos del usuario
-        document.getElementById("modalDetalleAlbumLabel").innerHTML = `
-        <div class="d-flex flex-column">
-          <div class="d-flex align-items-center gap-2">
-            <h4 class="mb-0"><strong>${data.apodo}</strong></h4>
-            <div class="text-muted fw-light"><small> - @${data.usuario}</small></div>
-          </div>
-          <div class="text-muted mt-1 fw-light" style="font-size: 0.9rem;">${fechaRelativa}</div>
-        </div>
-        `;
-
-        document.getElementById("modalFotoPerfil").src = data.fotoPerfil;
-        document
-          .getElementById("btnSeguir")
-          .setAttribute("data-id", data.idUsuario);
-
-        document.getElementById("detalleAlbumIzquierda").innerHTML =
-          data.izquierda;
-        document.getElementById("detalleAlbumDerecha").innerHTML = data.derecha;
-
-        //cambia la info de la imagen al cambiar de slide
-        let carrusel = document.getElementById("carouselAlbum");
-        function actualizarInfoImagen() {
-          let activo = carrusel.querySelector(".carousel-item.active");
-          let titulo = activo.getAttribute("data-titulo") || "";
-          let descripcion = activo.getAttribute("data-descripcion") || "";
-
-          document.getElementById("tituloImagen").textContent = titulo;
-          document.getElementById("descripcionImagen").textContent =
-            descripcion;
-        }
-
-        actualizarInfoImagen();
-
-        carrusel.addEventListener("slid.bs.carousel", actualizarInfoImagen);
-      });
-  });
-});
