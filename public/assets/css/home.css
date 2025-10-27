@@ -94,4 +94,9 @@
   font-weight: 500;
   margin-right: 5%;
   cursor: pointer;
+  text-decoration: none;
+}
+#listaComentarios p {
+  word-break: break-word;
+  white-space: pre-wrap;
 }

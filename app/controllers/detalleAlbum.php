@@ -57,7 +57,7 @@ $htmlIzquierda .= '<h5 id="tituloImagen"></h5>
 
 //iconos de like y comentario
 $htmlIzquierda .= '<img src="../../public/assets/images/like.png" alt="Me gusta" class="img-fluid me-4 me-sm-1" style="max-height: 30px; cursor: pointer; margin-top: 5px; padding-bottom: 6px;"><p class="d-inline-block textoIcon">Me gusta</p>
-<img src="../../public/assets/images/comentario.png" alt="Comentario" class="img-fluid me-4 me-sm-1" style="max-height: 27px; cursor: pointer; margin-top: 5px; padding-bottom: 5px;"><p class="d-inline-block textoIcon">Comentarios</p>';
+<a href="#formularioComentario"><img src="../../public/assets/images/comentario.png" alt="Comentario" class="img-fluid me-4 me-sm-1" style="max-height: 27px; cursor: pointer; margin-top: 5px; padding-bottom: 5px;"><p class="d-inline-block textoIcon">Comentarios</p></a>';
 
 //comentarios
 $comentariosPorImagen = [];

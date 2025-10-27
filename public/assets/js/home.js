@@ -423,9 +423,12 @@ document.getElementById("btnCrear").addEventListener("click", function (e) {
     console.log(key, value);
   }
   //envio los datos al controlador
+  // ajusta segun la estructura de carpetas
   const base = window.location.origin;
-  const rutaBase = window.location.pathname.split("/")[1]; // obtiene "Artesanos" o "artesanos"
-  fetch(`${base}/${rutaBase}/app/controllers/guardarAlbum.php`, {
+  const rutaRaiz = window.location.pathname.split("/app/views")[0]; // todo antes de /app/views
+  const ruta = `${base}${rutaRaiz}/app/controllers/guardarAlbum.php`;
+
+  fetch(ruta, {
     method: "POST",
     body: formData,
   })
