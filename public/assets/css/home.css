@@ -87,3 +87,11 @@
 .carousel-control-next-icon {
   transform: rotate(180deg); /* invierte la flecha para "siguiente" */
 }
+
+.textoIcon {
+  color: #4B944B;
+  font-size: 20px;
+  font-weight: 500;
+  margin-right: 5%;
+  cursor: pointer;
+}

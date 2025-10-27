@@ -23,7 +23,7 @@ document.querySelectorAll(".abrir-modal-album").forEach((el) => {
       .then((res) => res.json())
       .then((data) => {
         let fechaRelativa = tiempoRelativo(data.fecha);
-
+        console.log(data);
         //datos del usuario
         document.getElementById("modalDetalleAlbumLabel").innerHTML = `
         <div class="d-flex flex-column">
@@ -43,17 +43,86 @@ document.querySelectorAll(".abrir-modal-album").forEach((el) => {
         document.getElementById("detalleAlbumIzquierda").innerHTML =
           data.izquierda;
         document.getElementById("detalleAlbumDerecha").innerHTML = data.derecha;
+        setTimeout(() => {
+          const btnEnviar = document.getElementById("btnEnviarComentario");
+          const inputComentario = document.getElementById("inputComentario");
 
-        //cambia la info de la imagen al cambiar de slide
+          if (btnEnviar && inputComentario) {
+            btnEnviar.addEventListener("click", function () {
+              let idImagen = this.getAttribute("data-idimagen");
+              let mensaje = inputComentario.value.trim();
+              if (!mensaje) return;
+
+              fetch("../controllers/agregarComentario.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ idImagen, mensaje }),
+              })
+                .then((res) => res.json())
+                .then((res) => {
+                  if (res.ok) {
+                    let nuevo = `
+            <div class="d-flex gap-2 mb-3">
+              <img src="${res.avatar}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+              <div>
+                <strong>${res.apodo}</strong><br>
+                <p class="mb-0">${res.mensaje}</p>
+              </div>
+            </div>
+          `;
+                    document
+                      .getElementById("listaComentarios")
+                      .insertAdjacentHTML("beforeend", nuevo);
+                    inputComentario.value = "";
+
+                    if (!data.comentarios[idImagen]) {
+                      data.comentarios[idImagen] = [];
+                    }
+                    data.comentarios[idImagen].push({
+                      apodo: res.apodo,
+                      avatar: res.avatar,
+                      mensaje: res.mensaje,
+                      fecha: new Date().toISOString(),
+                    });
+                  }
+                });
+            });
+          }
+        }, 0);
+
+        //cambia la info de la imagen al cambiar de slide y los comentarios
         let carrusel = document.getElementById("carouselAlbum");
         function actualizarInfoImagen() {
           let activo = carrusel.querySelector(".carousel-item.active");
           let titulo = activo.getAttribute("data-titulo") || "";
           let descripcion = activo.getAttribute("data-descripcion") || "";
+          let idImagen = activo.getAttribute("data-idimagen");
 
           document.getElementById("tituloImagen").textContent = titulo;
           document.getElementById("descripcionImagen").textContent =
             descripcion;
+
+          let comentarios = data.comentarios[idImagen] || [];
+          let htmlComentarios = comentarios
+            .map(
+              (c) => `
+    <div class="d-flex gap-2 mb-3" style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px;">
+      <img src="${c.avatar}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+      <div>
+        <strong>${c.apodo}</strong><br>
+        <p class="mb-0">${c.mensaje}</p>
+      </div>
+    </div>
+  `
+            )
+            .join("");
+
+          document.getElementById("listaComentarios").innerHTML =
+            htmlComentarios;
+
+          document
+            .getElementById("btnEnviarComentario")
+            .setAttribute("data-idimagen", idImagen);
         }
 
         actualizarInfoImagen();
@@ -354,9 +423,9 @@ document.getElementById("btnCrear").addEventListener("click", function (e) {
     console.log(key, value);
   }
   //envio los datos al controlador
-const base = window.location.origin;
-const rutaBase = window.location.pathname.split("/")[1]; // obtiene "Artesanos" o "artesanos"
-fetch(`${base}/${rutaBase}/app/controllers/guardarAlbum.php`, {
+  const base = window.location.origin;
+  const rutaBase = window.location.pathname.split("/")[1]; // obtiene "Artesanos" o "artesanos"
+  fetch(`${base}/${rutaBase}/app/controllers/guardarAlbum.php`, {
     method: "POST",
     body: formData,
   })
@@ -393,4 +462,3 @@ fetch(`${base}/${rutaBase}/app/controllers/guardarAlbum.php`, {
       });
     });
 });
-
