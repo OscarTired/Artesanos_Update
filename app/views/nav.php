@@ -14,21 +14,23 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     <div class="collapse navbar-collapse" id="menuNav">
       <div class="d-flex flex-column flex-lg-row align-items-center justify-content-between w-100 gap-3 py-2">
 
-        <!-- 🔍 Barra de búsqueda -->
-        <div class="busqueda-wrapper position-relative mx-auto mt-1" style="max-width:600px;">
-          <div class="btn-group position-absolute top-0 end-0 me-2 mt-1 z-1">
-            <input type="radio" class="btn-check" name="tipo" id="btnArtesanos" value="artesanos" autocomplete="off" checked>
-            <label class="btn btn-blanco-negro btn-sm" for="btnArtesanos">Artesanos</label>
+      <!-- 🔍 Barra de búsqueda -->
+    <div class="busqueda-wrapper position-relative mx-auto mt-1" style="max-width:600px;">
+      <form method="GET" action="busqueda.php" class="mx-auto position-relative" id="formBusqueda" style="max-width:100%;">
+    
+      <!-- Campo de texto -->
+      <input type="text" class="form-control buscador" name="query" placeholder="Buscar...">
 
-            <input type="radio" class="btn-check" name="tipo" id="btnAlbumes" value="albumes" autocomplete="off">
-            <label class="btn btn-blanco-negro btn-sm" for="btnAlbumes">Álbumes</label>
-          </div>
+      <!-- Radios -->
+      <div class="btn-group position-absolute top-0 end-0 me-2 mt-1 z-1">
+        <input type="radio" class="btn-check" name="tipo" id="btnArtesanos" value="artesanos" autocomplete="off">
+        <label class="btn btn-blanco-negro btn-sm" for="btnArtesanos">Artesanos</label>
 
-          <form method="GET" action="busqueda.php" class="mx-auto" style="max-width:100%;">
-            <input type="text" class="form-control buscador" name="query" placeholder="Buscar..." required>
-          </form>
-        </div>
-
+        <input type="radio" class="btn-check" name="tipo" id="btnAlbumes" value="albumes" autocomplete="off">
+        <label class="btn btn-blanco-negro btn-sm" for="btnAlbumes">Álbumes</label>
+      </div>
+     </form>
+    </div>
         <!-- 👤 Parte derecha (sesión / perfil) -->
         <div class="d-flex justify-content-center justify-content-lg-end align-items-center gap-3 ms-lg-3">
           <?php if (!isset($_SESSION['usuario'])): ?>
@@ -61,3 +63,20 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     </div>
   </div>
 </nav>
+<!-- Script para enviar el formulario al hacer clic en los botones -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("formBusqueda");
+  const radios = form.querySelectorAll('input[name="tipo"]');
+  const input = form.querySelector('input[name="query"]');
+
+  // Enviar el form cuando se cambia de opción
+  radios.forEach(radio => {
+    radio.addEventListener("change", () => {
+      if (input.value.trim() === "") input.removeAttribute("required");
+      form.submit();
+    });
+  });
+});
+  
+</script>

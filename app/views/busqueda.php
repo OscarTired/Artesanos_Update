@@ -5,9 +5,10 @@ require_once '../../config/cerrarConexion.php';
 $conexion = abrirConexion();
 
 $busqueda = trim($_GET['query'] ?? '');
+$tipo = $_GET['tipo'] ?? 'artesanos'; // por defecto "artesanos"
 
-if ($busqueda !== '') {
-    // ✅ Consulta optimizada con subconsultas para contar seguidores y álbumes
+// Mostrar todos los artesanos
+if ($tipo === 'artesanos' && $busqueda === '') {
     $sql = "
         SELECT u.*, 
             f.imagenPerfil AS fotoPerfil,
@@ -15,28 +16,64 @@ if ($busqueda !== '') {
             (SELECT COUNT(*) FROM album a WHERE a.idUsuarioAlbum = u.idUsuario) AS totalAlb
         FROM usuario u
         LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
-        WHERE u.nombreUsuario LIKE CONCAT('%', ?, '%')
-           OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
-           OR u.apodoUsuario LIKE CONCAT('%', ?, '%')
-    ";
-    $stmt = $conexion->prepare($sql);
-    if (!$stmt) {
-        die('Error en la consulta SQL: ' . $conexion->error);
-    }
-    $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-} else {
-    // ✅ Si no hay búsqueda, opcionalmente mostrar todos
-    $sql = "
-        SELECT u.*, 
-            f.imagenPerfil AS fotoPerfil,
-            (SELECT COUNT(*) FROM seguimiento s WHERE s.idSeguido = u.idUsuario) AS totalSeg,
-            (SELECT COUNT(*) FROM album a WHERE a.idUsuarioAlbum = u.idUsuario) AS totalAlb
-        FROM usuario u
-        LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
+        
     ";
     $resultado = $conexion->query($sql);
+}
+
+// Mostrar todos los albumes
+elseif ($tipo === 'albumes' && $busqueda === '') {
+    $sql = "
+        SELECT a.*, u.apodoUsuario, u.arrobaUsuario, f.imagenPerfil AS fotoPerfil
+        FROM album a
+        INNER JOIN usuario u ON u.idUsuario = a.idUsuarioAlbum
+        LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
+        ORDER BY a.idAlbum DESC
+    ";
+    $resultado = $conexion->query($sql);
+}
+
+// Busqueda con texto
+elseif ($busqueda !== '') {
+    if ($tipo === 'artesanos') {
+        $sql = "
+            SELECT u.*, 
+                f.imagenPerfil AS fotoPerfil,
+                (SELECT COUNT(*) FROM seguimiento s WHERE s.idSeguido = u.idUsuario) AS totalSeg,
+                (SELECT COUNT(*) FROM album a WHERE a.idUsuarioAlbum = u.idUsuario) AS totalAlb
+            FROM usuario u
+            LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
+            WHERE (u.nombreUsuario LIKE CONCAT('%', ?, '%')
+                OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
+                OR u.apodoUsuario LIKE CONCAT('%', ?, '%'))
+                
+        ";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+    } 
+    else if ($tipo === 'albumes') {
+        $sql = "
+            SELECT a.*, u.apodoUsuario, u.arrobaUsuario, f.imagenPerfil AS fotoPerfil
+            FROM album a
+            INNER JOIN usuario u ON u.idUsuario = a.idUsuarioAlbum
+            LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
+            WHERE a.tituloAlbum LIKE CONCAT('%', ?, '%')
+               OR u.apodoUsuario LIKE CONCAT('%', ?, '%')
+               OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
+            ORDER BY a.idAlbum DESC
+        ";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+    }
+}
+
+// Sin resultado o error
+else {
+    $resultado = false;
 }
 ?>
 
@@ -57,50 +94,61 @@ if ($busqueda !== '') {
 <?php include 'nav.php'; ?> 
 
 <main class="contenedor">
-    <?php if ($resultado && $resultado->num_rows > 0): ?>
-        <div class="grid">
+<?php if ($resultado && $resultado->num_rows > 0): ?>
+    <div class="grid">
+        <?php if ($tipo === 'artesanos'): ?>
+            <!--  Mostrar artesanos -->
             <?php while ($row = $resultado->fetch_assoc()): ?>
                 <?php
-                // ✅ Datos del usuario
                 $apodo = htmlspecialchars($row['apodoUsuario']);
                 $arroba = htmlspecialchars($row['arrobaUsuario']);
                 $totalSeg = (int)$row['totalSeg'];
                 $totalAlb = (int)$row['totalAlb'];
-
-                // ✅ Foto de perfil (desde la base de datos)
-                if (!empty($row['fotoPerfil'])) {
-                    $foto = '../../public/uploads/avatars/' . htmlspecialchars($row['fotoPerfil']);
-                } else {
-                    $foto = '../../public/assets/images/logo.png';
-                }
+                $foto = !empty($row['fotoPerfil'])
+                    ? '../../public/uploads/avatars/' . htmlspecialchars($row['fotoPerfil'])
+                    : '../../public/assets/images/logo.png';
                 ?>
-                
                 <div class="tarjeta">
                     <img class="banner" src="https://placehold.co/300x100" alt="Banner">
                     <img class="avatar" src="<?= $foto ?>" alt="Avatar">
-
                     <h3><?= $apodo ?></h3>
                     <p>@<?= $arroba ?></p>
-
                     <div class="stats">
                         <span><?= $totalSeg ?> Seguidores</span> | 
                         <span><?= $totalAlb ?> Álbumes</span>
                     </div>
-
-                    <button class="seguir">Seguir</button>
                     <a class="verPerfil" href="perfil.php?id=<?= urlencode($row['idUsuario']) ?>">Ver perfil</a>
                 </div>
             <?php endwhile; ?>
-        </div>
-    <?php else: ?>
-        <p class="sin-resultados">
-            No se encontraron resultados para <b><?= htmlspecialchars($busqueda) ?></b>.
-        </p>
-    <?php endif; ?>
+        <?php else: ?>
+            <!--  Mostrar álbumes -->
+            <?php while ($row = $resultado->fetch_assoc()): ?>
+                <?php
+                $titulo = htmlspecialchars($row['tituloAlbum']);
+                $apodo = htmlspecialchars($row['apodoUsuario']);
+                $arroba = htmlspecialchars($row['arrobaUsuario']);
+                $foto = !empty($row['fotoPerfil'])
+                    ? '../../public/uploads/avatars/' . htmlspecialchars($row['fotoPerfil'])
+                    : '../../public/assets/images/logo.png';
+                ?>
+                <div class="tarjeta">
+                    <img class="banner" src="https://placehold.co/300x100" alt="Banner álbum">
+                    <img class="avatar" src="<?= $foto ?>" alt="Avatar usuario">
+                    <h3><?= $titulo ?></h3>
+                    <p>de <?= $apodo ?> (@<?= $arroba ?>)</p>
+                    <a class="verPerfil" href="verAlbum.php?id=<?= urlencode($row['idAlbum']) ?>">Ver álbum</a>
+                </div>
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </div>
+<?php else: ?>
+    <p class="sin-resultados">
+        No se encontraron resultados para <b><?= htmlspecialchars($busqueda) ?></b>.
+    </p>
+<?php endif; ?>
 
-    <?php cerrarConexion($conexion); ?>
+<?php cerrarConexion($conexion); ?>
 </main>
-
 
 </body>
 </html>
