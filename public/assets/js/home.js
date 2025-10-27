@@ -354,7 +354,8 @@ document.getElementById("btnCrear").addEventListener("click", function (e) {
     console.log(key, value);
   }
   //envio los datos al controlador
-  fetch("/artesanos/app/controllers/guardarAlbum.php", {
+
+  fetch("../controllers/guardarAlbum.php", {
     method: "POST",
     body: formData,
   })
