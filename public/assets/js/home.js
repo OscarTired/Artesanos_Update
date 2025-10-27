@@ -354,8 +354,9 @@ document.getElementById("btnCrear").addEventListener("click", function (e) {
     console.log(key, value);
   }
   //envio los datos al controlador
-
-  fetch("../controllers/guardarAlbum.php", {
+const base = window.location.origin;
+const rutaBase = window.location.pathname.split("/")[1]; // obtiene "Artesanos" o "artesanos"
+fetch(`${base}/${rutaBase}/app/controllers/guardarAlbum.php`, {
     method: "POST",
     body: formData,
   })
