@@ -19,7 +19,7 @@ document.querySelectorAll(".abrir-modal-album").forEach((el) => {
   el.addEventListener("click", function () {
     let idAlbum = this.getAttribute("data-id");
 
-    fetch(`/Artesanos/app/controllers/detalleAlbum.php?id=${idAlbum}`)
+    fetch(`../controllers/detalleAlbum.php?id=${idAlbum}`)
       .then((res) => res.json())
       .then((data) => {
         let fechaRelativa = tiempoRelativo(data.fecha);

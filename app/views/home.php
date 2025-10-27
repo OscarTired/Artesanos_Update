@@ -42,7 +42,7 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
               <a href="" class="abrir-modal-album" data-id="' . $a->idAlbum . '" data-bs-toggle="modal" data-bs-target="#modalDetalleAlbum" style="text-decoration: none; color: inherit;">
               <div class="card-body">
               
-              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="/Artesanos/public/uploads/portadas/' . $a->urlPortada . '"/>
+              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="../../public/uploads/portadas/' . $a->urlPortada . '"/>
 
               <div class="d-flex justify-content-between align-items-center">
               <h5 class="card-title mb-0">' . $a->tituloAlbum . '</h5>

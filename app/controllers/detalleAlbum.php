@@ -32,7 +32,7 @@ foreach ($imagenes as $i => $img) {
         data-titulo="' . htmlspecialchars($img['tituloImagen']) . '" 
         data-descripcion="' . htmlspecialchars($img['descripcionImagen']) . '">
         <div style="width: 100%; max-width: 500px; aspect-ratio: 1 / 1; overflow: hidden; margin: auto;">
-            <img src="/Artesanos/public/uploads/imagenes/' . $img['urlImagen'] . '" class="w-100 h-100" style="object-fit: contain;">
+            <img src="../../public/uploads/imagenes/' . $img['urlImagen'] . '" class="w-100 h-100" style="object-fit: contain;">
         </div>
     </div>';
 }
@@ -48,6 +48,9 @@ $htmlIzquierda .= '</div>
 
 $htmlIzquierda .= '<h5 id="tituloImagen"></h5>
 <p id="descripcionImagen" class="text-muted"></p>';
+
+//iconos de like y comentario
+
 
 // columna derecha, perfil
 $htmlDerecha = '<div class="text-center mt-5">
