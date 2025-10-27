@@ -125,6 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           </a>
         </div>
 
+
         <div class="button-row">
           <button type="submit" class="btn btn-main w-100 mb-2">Iniciar sesión</button>
           <button type="button" class="btn btn-outline w-100" onclick="window.location.href='home.php#registro'">Quiero registrarme</button>
@@ -132,6 +133,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </form>
     </div>
   </div>
+  <!-- MODAL Recuperar Contraseña -->
+<div class="modal fade" id="modalRecuperar" tabindex="-1" aria-labelledby="recuperarLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="formRecuperar" method="POST" action="recuperar.php">
+        <div class="modal-header">
+          <h5 class="modal-title" id="recuperarLabel">Recuperar contraseña</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Ingresa tu correo electrónico para restablecer tu contraseña.</p>
+          <input type="email" name="correo" id="correoRecuperar" class="form-control" placeholder="Tu correo" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-warning">Enviar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -145,6 +167,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       });
     });
   </script>
+
+  <script>
+document.getElementById("formRecuperar").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+
+  const response = await fetch("recuperar.php", { method: "POST", body: data });
+  const result = await response.json();
+
+  alert(result.message);
+
+  if (result.status === "success") {
+    // Redirigir al formulario para cambiar contraseña
+    window.location.href = result.redirect;
+  }
+});
+</script>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
