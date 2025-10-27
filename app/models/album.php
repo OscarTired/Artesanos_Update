@@ -4,7 +4,7 @@
 // No accede directamente a la base de datos, solo modela los datos.
 
 class Album{
-    private $idAlbum, $tituloAlbum, $esPublico, $urlPortada, $idUsuario, $apodoUsuario, $arrobaUsuario;
+    private $idAlbum, $tituloAlbum, $esPublico, $urlPortada, $idUsuario, $apodoUsuario, $arrobaUsuario, $fechaCreacion;
     public function __construct($tituloAlbum, $esPublico, $urlPortada, $idUsuario){
         
         $this->tituloAlbum = $tituloAlbum;

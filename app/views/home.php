@@ -39,12 +39,14 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
         foreach ($albumes as $a) {
           echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 album-item">
               
+              <a href="" class="abrir-modal-album" data-id="' . $a->idAlbum . '" data-bs-toggle="modal" data-bs-target="#modalDetalleAlbum" style="text-decoration: none; color: inherit;">
               <div class="card-body">
-              <a href="" class="abrir-modal-album" data-id="' . $a->idAlbum . '" data-bs-toggle="modal" data-bs-target="#modalDetalleAlbum">
-              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="/Artesanos/public/uploads/portadas/' . $a->urlPortada . '"/></a>
+              
+              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="/Artesanos/public/uploads/portadas/' . $a->urlPortada . '"/>
 
               <div class="d-flex justify-content-between align-items-center">
               <h5 class="card-title mb-0">' . $a->tituloAlbum . '</h5>
+              </a>
               <div class="d-flex gap-2">
               <img src="../../public/assets/images/like.png" alt="Me gusta" class="img-fluid me-4 me-sm-1" style="max-height: 25px; cursor: pointer; margin-top: 5px">
               <img src="../../public/assets/images/comentario.png" alt="Comentario" class="img-fluid me-4 me-sm-1" style="max-height: 23px; cursor: pointer; margin-top: 5px">
@@ -68,28 +70,36 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
     </div>
   </div>
   <!-- detalle de album-->
-<div class="modal fade" id="modalDetalleAlbum" tabindex="-1" aria-labelledby="modalDetalleAlbumLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content p-4">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalDetalleAlbumLabel">Detalle del álbum</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-lg-9" id="detalleAlbumIzquierda">
-           <!--aca va el carrusel de las imagenes etc -->
-           en construccion
+  <div class="modal fade" id="modalDetalleAlbum" tabindex="-1" aria-labelledby="modalDetalleAlbumLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content p-4">
+        <div class="modal-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <img id="modalFotoPerfil" src="" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+            <h5 class="modal-title mb-0" id="modalDetalleAlbumLabel">Nombre del usuario</h5>
           </div>
+          <div class="d-flex align-items-center gap-2">
+            <button id="btnSeguir" class="btn btn-outline-primary btn-sm">Seguir</button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+        </div>
 
-          <div class="col-lg-3" id="detalleAlbumDerecha">
-            <!--aca va el perfil -->
+
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-lg-9" id="detalleAlbumIzquierda">
+              <!--aca va el carrusel de las imagenes etc -->
+              en construccion
+            </div>
+
+            <div class="col-lg-3" id="detalleAlbumDerecha">
+              <!--aca va el perfil -->
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
 
   <?php if ($idUsuario == 0): include 'registro.php';

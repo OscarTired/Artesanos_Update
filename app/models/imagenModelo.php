@@ -42,10 +42,15 @@ class ImagenModelo
         $imagenes = [];
         if (mysqli_num_rows($resultado) > 0) {
             while ($fila = mysqli_fetch_assoc($resultado)) {
-                $imagen = new Imagen($fila['tituloImagen'], $fila['descripcionImagen'], $fila['etiquetaImagen'], $fila['fechaImagen'], $fila['urlImagen']);
-                $imagen->idAlbum = $fila['idAlbumImagen'];
-                $imagen->idImagen = $fila['idImagen'];
-
+                $imagen = [
+                    'idImagen' => $fila['idImagen'],
+                    'tituloImagen' => $fila['tituloImagen'],
+                    'descripcionImagen' => $fila['descripcionImagen'],
+                    'etiquetaImagen' => $fila['etiquetaImagen'],
+                    'fechaImagen' => $fila['fechaImagen'],
+                    'urlImagen' => $fila['urlImagen'],
+                    'idAlbumImagen' => $fila['idAlbumImagen']
+                ];
                 $imagenes[] = $imagen;
             }
             cerrarConexion($conexion);

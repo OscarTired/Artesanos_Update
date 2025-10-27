@@ -44,7 +44,7 @@
 #inputPortada, #inputImagenes {
     display: none;
 }
-#btnSiguiente,#btnCrear,#btnSiguiente2 {
+#btnSiguiente,#btnCrear,#btnSiguiente2, #btnSeguir {
     padding: 6px 20px;
     background-color: #ff7f45;
     border: 1px solid #ff7f45;
@@ -55,7 +55,7 @@
     text-align: center;
     transition: background-color 0.3s ease;
 }
-#btnSiguiente:hover,#btnCrear:hover,#btnSiguiente2:hover {
+#btnSiguiente:hover,#btnCrear:hover,#btnSiguiente2:hover, #btnSeguir:hover {
   background-color: #fffffd;
   color: #ff7f45;
   border: 1px solid #ff7f45;
@@ -72,4 +72,18 @@
 .was-validated .form-control:invalid {
   background-image: none !important;
   padding-right: 0.75rem; 
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-image: none; /* quita el ícono por defecto */
+  width: 2rem;
+  height: 2rem;
+  display: inline-block;
+  background-color: rgba(0, 0, 0, 0.6); /* fondo oscuro */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
+  mask-size: cover;
+}
+.carousel-control-next-icon {
+  transform: rotate(180deg); /* invierte la flecha para "siguiente" */
 }
