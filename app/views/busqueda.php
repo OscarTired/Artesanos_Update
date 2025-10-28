@@ -108,8 +108,13 @@ else {
                     ? '../../public/uploads/avatars/' . htmlspecialchars($row['fotoPerfil'])
                     : '../../public/assets/images/logo.png';
                 ?>
+                <?php
+                $colores = ['#ffeedb', '#ffe0cc', '#ffd1a3', '#ffd6cc', '#e0ffe0', '#d9e8ff', '#f0d9ff', '#fff6cc'];
+                $colorRandom = $colores[array_rand($colores)];
+                ?>
+
                 <div class="tarjeta">
-                    <img class="banner" src="https://placehold.co/300x100" alt="Banner">
+                    <div class="banner" style="background-color: <?=$colorRandom?>;"></div>
                     <img class="avatar" src="<?= $foto ?>" alt="Avatar">
                     <h3><?= $apodo ?></h3>
                     <p>@<?= $arroba ?></p>

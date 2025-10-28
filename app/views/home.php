@@ -37,12 +37,16 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
       <?php
       if (!empty($albumes) && count($albumes) > 0) { //si hay albumes los muestra
         foreach ($albumes as $a) {
+          $portada = !empty($a->urlPortada)
+            ? '../../public/uploads/portadas/' . htmlspecialchars($a->urlPortada)
+            : 'https://placehold.co/300x100?text=Sin+Portada';
+
           echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 album-item">
               
               <a href="" class="abrir-modal-album" data-id="' . $a->idAlbum . '" data-bs-toggle="modal" data-bs-target="#modalDetalleAlbum" style="text-decoration: none; color: inherit;">
               <div class="card-body">
               
-              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="../../public/uploads/portadas/' . $a->urlPortada . '"/>
+              <img class="card-img-top" style="border-radius: 10px; height: 200px; object-fit: cover;" src="' . $portada . '" alt="Portada del álbum">
 
               <div class="d-flex justify-content-between align-items-center">
               <h5 class="card-title mb-0">' . $a->tituloAlbum . '</h5>
