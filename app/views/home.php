@@ -37,8 +37,8 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
       <?php
       if (!empty($albumes) && count($albumes) > 0) { //si hay albumes los muestra
         foreach ($albumes as $a) {
-          $portada = !empty($a->urlPortada)
-            ? '../../public/uploads/portadas/' . htmlspecialchars($a->urlPortada)
+          $portada = !empty($a->urlPortadaAlbum)
+            ? '../../public/uploads/portadas/' . htmlspecialchars($a->urlPortadaAlbum)
             : 'https://placehold.co/300x100?text=Sin+Portada';
 
           echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 album-item">
