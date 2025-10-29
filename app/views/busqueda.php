@@ -144,7 +144,13 @@ else {
                     <img class="avatar" src="<?= $foto ?>" alt="Avatar usuario">
                     <h3><?= $titulo ?></h3>
                     <p>de <?= $apodo ?> (@<?= $arroba ?>)</p>
-                    <a class="verPerfil" href="verAlbum.php?id=<?= urlencode($row['idAlbum']) ?>">Ver álbum</a>
+                    <a href="#" 
+                       class="abrir-modal-album verPerfil" 
+                       data-id="<?= htmlspecialchars($row['idAlbum']) ?>" 
+                       data-bs-toggle="modal" 
+                       data-bs-target="#modalDetalleAlbum">
+                       Ver álbum
+                    </a>
                 </div>
             <?php endwhile; ?>
         <?php endif; ?>
@@ -157,6 +163,37 @@ else {
 
 <?php cerrarConexion($conexion); ?>
 </main>
+<!-- 🟦 Modal detalle de álbum (copiado desde home.php) -->
+<div class="modal fade" id="modalDetalleAlbum" tabindex="-1" aria-labelledby="modalDetalleAlbumLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content p-4">
+      <div class="modal-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+          <img id="modalFotoPerfil" src="" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+          <h5 class="modal-title mb-0" id="modalDetalleAlbumLabel">Nombre del usuario</h5>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button id="btnSeguir" class="btn btn-outline-primary btn-sm">Seguir</button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-9" id="detalleAlbumIzquierda">
+            en construcción...
+          </div>
+          <div class="col-lg-3" id="detalleAlbumDerecha">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../public/assets/js/home.js"></script>
 
 </body>
 </html>
