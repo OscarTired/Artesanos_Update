@@ -107,8 +107,7 @@ else {
                 $foto = !empty($row['fotoPerfil'])
                     ? '../../public/uploads/avatars/' . htmlspecialchars($row['fotoPerfil'])
                     : '../../public/assets/images/logo.png';
-                ?>
-                <?php
+                
                 $colores = ['#ffeedb', '#ffe0cc', '#ffd1a3', '#ffd6cc', '#e0ffe0', '#d9e8ff', '#f0d9ff', '#fff6cc'];
                 $colorRandom = $colores[array_rand($colores)];
                 ?>
@@ -135,9 +134,13 @@ else {
                 $foto = !empty($row['fotoPerfil'])
                     ? '../../public/uploads/avatars/' . htmlspecialchars($row['fotoPerfil'])
                     : '../../public/assets/images/logo.png';
+                $portada = !empty($row['urlPortadaAlbum'])
+                    ? '../../public/uploads/portadas/' . htmlspecialchars($row['urlPortadaAlbum'])
+                    : 'https://placehold.co/300x100?text=Sin+Portada';
+                
                 ?>
                 <div class="tarjeta">
-                    <img class="banner" src="https://placehold.co/300x100" alt="Banner álbum">
+                    <img class="portadas" style="border-radius: 10px; width: 100%; height: 200px; object-fit: cover; object-position: center;" src="<?= htmlspecialchars($portada) ?>" alt="Portada del álbum">
                     <img class="avatar" src="<?= $foto ?>" alt="Avatar usuario">
                     <h3><?= $titulo ?></h3>
                     <p>de <?= $apodo ?> (@<?= $arroba ?>)</p>
