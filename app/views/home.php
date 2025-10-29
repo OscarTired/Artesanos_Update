@@ -192,9 +192,6 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
     </div>
     </form>
     </div>
-
-
-
     </div>
     </div>
   <?php endif; ?>
