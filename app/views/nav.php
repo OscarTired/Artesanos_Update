@@ -29,6 +29,8 @@ if (session_status() === PHP_SESSION_NONE) session_start();
         <input type="radio" class="btn-check" name="tipo" id="btnAlbumes" value="albumes" autocomplete="off">
         <label class="btn btn-blanco-negro btn-sm" for="btnAlbumes">Álbumes</label>
       </div>
+      <!-- Botón de envío oculto -->
+      <button type="submit" style="display:none"></button>
      </form>
     </div>
         <!-- 👤 Parte derecha (sesión / perfil) -->

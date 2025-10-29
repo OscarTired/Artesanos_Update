@@ -5,7 +5,14 @@ require_once '../../config/cerrarConexion.php';
 $conexion = abrirConexion();
 
 $busqueda = trim($_GET['query'] ?? '');
-$tipo = $_GET['tipo'] ?? 'artesanos'; // por defecto "artesanos"
+
+// 🟢 Detectar tipo (si no se elige, decide automáticamente)
+if (isset($_GET['tipo'])) {
+    $tipo = $_GET['tipo'];
+} else {
+    // Si hay texto de búsqueda, buscar en álbumes; si no, mostrar artesanos
+    $tipo = ($busqueda !== '') ? 'albumes' : 'artesanos';
+}
 
 // Mostrar todos los artesanos
 if ($tipo === 'artesanos' && $busqueda === '') {
@@ -16,12 +23,11 @@ if ($tipo === 'artesanos' && $busqueda === '') {
             (SELECT COUNT(*) FROM album a WHERE a.idUsuarioAlbum = u.idUsuario) AS totalAlb
         FROM usuario u
         LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
-        
     ";
     $resultado = $conexion->query($sql);
 }
 
-// Mostrar todos los albumes
+// Mostrar todos los álbumes
 elseif ($tipo === 'albumes' && $busqueda === '') {
     $sql = "
         SELECT a.*, u.apodoUsuario, u.arrobaUsuario, f.imagenPerfil AS fotoPerfil
@@ -33,9 +39,10 @@ elseif ($tipo === 'albumes' && $busqueda === '') {
     $resultado = $conexion->query($sql);
 }
 
-// Busqueda con texto
+// 🔍 Búsqueda con texto (busca según el tipo elegido)
 elseif ($busqueda !== '') {
     if ($tipo === 'artesanos') {
+        // Buscar artesanos
         $sql = "
             SELECT u.*, 
                 f.imagenPerfil AS fotoPerfil,
@@ -46,14 +53,9 @@ elseif ($busqueda !== '') {
             WHERE (u.nombreUsuario LIKE CONCAT('%', ?, '%')
                 OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
                 OR u.apodoUsuario LIKE CONCAT('%', ?, '%'))
-                
         ";
-        $stmt = $conexion->prepare($sql);
-        $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
-        $stmt->execute();
-        $resultado = $stmt->get_result();
-    } 
-    else if ($tipo === 'albumes') {
+    } elseif ($tipo === 'albumes') {
+        // Buscar álbumes
         $sql = "
             SELECT a.*, u.apodoUsuario, u.arrobaUsuario, f.imagenPerfil AS fotoPerfil
             FROM album a
@@ -64,18 +66,33 @@ elseif ($busqueda !== '') {
                OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
             ORDER BY a.idAlbum DESC
         ";
-        $stmt = $conexion->prepare($sql);
-        $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
-        $stmt->execute();
-        $resultado = $stmt->get_result();
+    } else {
+        // Si no se marcó tipo, busca en álbumes por defecto
+        $sql = "
+            SELECT a.*, u.apodoUsuario, u.arrobaUsuario, f.imagenPerfil AS fotoPerfil
+            FROM album a
+            INNER JOIN usuario u ON u.idUsuario = a.idUsuarioAlbum
+            LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
+            WHERE a.tituloAlbum LIKE CONCAT('%', ?, '%')
+               OR u.apodoUsuario LIKE CONCAT('%', ?, '%')
+               OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
+            ORDER BY a.idAlbum DESC
+        ";
     }
+
+    $stmt = $conexion->prepare($sql);
+    $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
 }
+
 
 // Sin resultado o error
 else {
     $resultado = false;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -88,6 +105,7 @@ else {
     <!-- CSS personalizado -->
     <link rel="stylesheet" href="../../public/assets/css/nav.css">
     <link rel="stylesheet" href="../../public/assets/css/buscar.css">
+    <link rel="stylesheet" href="../../public/assets/css/home.css">
 </head>
 <body>
 
