@@ -6,13 +6,20 @@ $conexion = abrirConexion();
 
 $busqueda = trim($_GET['query'] ?? '');
 
-// 🟢 Detectar tipo (si no se elige, decide automáticamente)
-if (isset($_GET['tipo'])) {
+if (isset($_GET['tipo']) && in_array($_GET['tipo'], ['artesanos', 'albumes'])) {
     $tipo = $_GET['tipo'];
 } else {
-    // Si hay texto de búsqueda, buscar en álbumes; si no, mostrar artesanos
-    $tipo = ($busqueda !== '') ? 'albumes' : 'artesanos';
+    // Detecta automáticamente el tipo de búsqueda
+    if ($busqueda === '') {
+        $tipo = 'artesanos'; // sin texto → mostrar usuarios
+    } elseif (strpos($busqueda, '@') === 0) {
+        $tipo = 'artesanos'; // si empieza con @ → buscar usuarios
+        $busqueda = substr($busqueda, 1); // quita la arroba para buscar
+    } else {
+        $tipo = 'albumes'; // por defecto → buscar álbumes
+    }
 }
+
 
 // Mostrar todos los artesanos
 if ($tipo === 'artesanos' && $busqueda === '') {

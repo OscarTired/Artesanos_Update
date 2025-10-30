@@ -1,6 +1,25 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
+
+require_once '../../config/conexion.php';
+require_once '../../config/cerrarConexion.php';
+$conexion = abrirConexion();
+
+
+$idUsuario = $_SESSION['usuario']['id'] ?? 0;
+
+// contar notificaciones no leídas
+$count = 0;
+if ($idUsuario > 0) {
+    $sqlNotif = "SELECT COUNT(*) AS noLeidas FROM notificaciones WHERE idUsuarioDestino = ? AND leida = 0";
+    $stmt = $conexion->prepare($sqlNotif);
+    $stmt->bind_param("i", $idUsuario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $count = $result->fetch_assoc()['noLeidas'] ?? 0;
+}    
 ?>
+
 <nav class="navbar navbar-expand-lg sticky-top shadow-sm" style="background-color: #FFFFF0;">
   <div class="container-fluid">
     <a class="navbar-brand" href="home.php">
@@ -41,11 +60,32 @@ if (session_status() === PHP_SESSION_NONE) session_start();
               <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión
             </a>
           <?php else: ?>
-            <!-- Logueado -->
-            <button class="btn position-relative">
-              <i class="bi bi-bell fs-5"></i>
-              <span class="position-absolute top-80 start-80 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-            </button>
+
+            <div class="position-relative" id="notificacionesWrapper">
+              <button type="button" class="btn position-relative" id="btnNotificaciones">
+                <i class="bi bi-bell fs-5"></i>
+                <?php if ($count > 0): ?>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    <?= $count ?>
+                  </span>
+                <?php endif; ?>
+              </button>
+
+              <!-- 🔔 Dropdown de notificaciones -->
+              <div id="dropdownNotificaciones" 
+                  class="card shadow border-0 position-absolute end-0 mt-2" 
+                  style="width: 350px; display: none; z-index: 1050;">
+                <div class="card-header bg-light fw-bold">Mis notificaciones</div>
+                <div class="card-body p-0" 
+                    id="contenedorNotificaciones"
+                    style="max-height: 400px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ff9800 #f9f9f9;">
+                  <div class="text-center text-muted py-3">Cargando notificaciones...</div>
+                </div>
+
+              </div>
+            </div>
+
+
 
             <?php
               // 📦 Incluir helper y obtener avatar
@@ -64,15 +104,35 @@ if (session_status() === PHP_SESSION_NONE) session_start();
       </div>
     </div>
   </div>
-</nav>
-<!-- Script para enviar el formulario al hacer clic en los botones -->
+      <style>
+    #contenedorNotificaciones::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #contenedorNotificaciones::-webkit-scrollbar-track {
+      background: #f9f9f9;
+      border-radius: 10px;
+    }
+
+    #contenedorNotificaciones::-webkit-scrollbar-thumb {
+      background-color: #ff9800; /* naranja */
+      border-radius: 10px;
+    }
+
+    #contenedorNotificaciones::-webkit-scrollbar-thumb:hover {
+      background-color: #e68900; /* naranja más oscuro al pasar */
+    }
+    </style>
+
+  </nav>
+  
 <script>
+//  Enviar formulario de búsqueda automáticamente
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("formBusqueda");
   const radios = form.querySelectorAll('input[name="tipo"]');
   const input = form.querySelector('input[name="query"]');
 
-  // Enviar el form cuando se cambia de opción
   radios.forEach(radio => {
     radio.addEventListener("change", () => {
       if (input.value.trim() === "") input.removeAttribute("required");
@@ -80,5 +140,82 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
-  
+
+
+//  Actualizar numerito de notificaciones
+function actualizarNotificaciones() {
+  fetch('../controllers/notificacionesControl.php')
+    .then(res => res.json())
+    .then(data => {
+      const badge = document.querySelector('.badge.bg-danger');
+      const bell = document.querySelector('.bi-bell').parentElement;
+
+      if (data.noLeidas > 0) {
+        if (badge) {
+          badge.textContent = data.noLeidas;
+        } else {
+          const span = document.createElement('span');
+          span.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+          span.textContent = data.noLeidas;
+          bell.appendChild(span);
+        }
+      } else if (badge) {
+        badge.remove();
+      }
+    })
+    .catch(err => console.error('Error al actualizar notificaciones:', err));
+}
+
+//  Actualiza el numerito cada 10 segundos
+setInterval(actualizarNotificaciones, 10000);
+
+
+//  Cargar notificaciones al abrir el modal
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById('modalNotificaciones');
+  modal.addEventListener('show.bs.modal', () => {
+    fetch('../controllers/listarNotificaciones.php')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('contenedorNotificaciones').innerHTML = html;
+        // Después de abrir el modal, actualizar el numerito (porque se marcan como leídas)
+        setTimeout(actualizarNotificaciones, 1000);
+      })
+      .catch(err => {
+        document.getElementById('contenedorNotificaciones').innerHTML =
+          '<div class="alert alert-danger">Error al cargar notificaciones.</div>';
+        console.error(err);
+      });
+  });
+});
 </script>
+
+<script>
+//  Mostrar / ocultar el dropdown al hacer clic en la campanita
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btnNotificaciones");
+  const dropdown = document.getElementById("dropdownNotificaciones");
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const visible = dropdown.style.display === "block";
+    dropdown.style.display = visible ? "none" : "block";
+
+    // Si se abre, cargamos las notificaciones
+    if (!visible) {
+      fetch('../controllers/listarNotificaciones.php')
+        .then(res => res.text())
+        .then(html => dropdown.querySelector('#contenedorNotificaciones').innerHTML = html)
+        .catch(() => dropdown.querySelector('#contenedorNotificaciones').innerHTML = 
+          '<div class="alert alert-danger m-2">Error al cargar notificaciones.</div>');
+    }
+  });
+
+  // Cerrar al hacer clic fuera
+  document.addEventListener("click", () => dropdown.style.display = "none");
+});
+</script>
+
+
+
+  
