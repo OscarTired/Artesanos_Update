@@ -46,8 +46,14 @@ elseif ($tipo === 'albumes' && $busqueda === '') {
     $resultado = $conexion->query($sql);
 }
 
-// 🔍 Búsqueda con texto (busca según el tipo elegido)
+
 elseif ($busqueda !== '') {
+    // Si la búsqueda empieza con "#", quitamos el símbolo
+    if (strpos($busqueda, '#') === 0) {
+        $busqueda = substr($busqueda, 1);
+        $tipo = 'albumes'; // al buscar por #, forzamos búsqueda en álbumes
+    }
+
     if ($tipo === 'artesanos') {
         // Buscar artesanos
         $sql = "
@@ -61,38 +67,31 @@ elseif ($busqueda !== '') {
                 OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
                 OR u.apodoUsuario LIKE CONCAT('%', ?, '%'))
         ";
-    } elseif ($tipo === 'albumes') {
-        // Buscar álbumes
-        $sql = "
-            SELECT a.*, u.apodoUsuario, u.arrobaUsuario, f.imagenPerfil AS fotoPerfil
-            FROM album a
-            INNER JOIN usuario u ON u.idUsuario = a.idUsuarioAlbum
-            LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
-            WHERE a.tituloAlbum LIKE CONCAT('%', ?, '%')
-               OR u.apodoUsuario LIKE CONCAT('%', ?, '%')
-               OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
-            ORDER BY a.idAlbum DESC
-        ";
-    } else {
-        // Si no se marcó tipo, busca en álbumes por defecto
-        $sql = "
-            SELECT a.*, u.apodoUsuario, u.arrobaUsuario, f.imagenPerfil AS fotoPerfil
-            FROM album a
-            INNER JOIN usuario u ON u.idUsuario = a.idUsuarioAlbum
-            LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
-            WHERE a.tituloAlbum LIKE CONCAT('%', ?, '%')
-               OR u.apodoUsuario LIKE CONCAT('%', ?, '%')
-               OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
-            ORDER BY a.idAlbum DESC
-        ";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
     }
 
-    $stmt = $conexion->prepare($sql);
-    $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
+    elseif ($tipo === 'albumes') {
+        // Buscar álbumes por título, usuario o etiquetas de imágenes
+        $sql = "
+            SELECT DISTINCT a.*, u.apodoUsuario, u.arrobaUsuario, f.imagenPerfil AS fotoPerfil
+            FROM album a
+            INNER JOIN usuario u ON u.idUsuario = a.idUsuarioAlbum
+            LEFT JOIN fotosdeperfil f ON f.idFotoPerfil = u.idFotoPerfilUsuario
+            LEFT JOIN imagen i ON i.idAlbumImagen = a.idAlbum
+            WHERE a.tituloAlbum LIKE CONCAT('%', ?, '%')
+               OR u.apodoUsuario LIKE CONCAT('%', ?, '%')
+               OR u.arrobaUsuario LIKE CONCAT('%', ?, '%')
+               OR i.etiquetaImagen LIKE CONCAT('%', ?, '%')
+            ORDER BY a.idAlbum DESC
+        ";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param('ssss', $busqueda, $busqueda, $busqueda, $busqueda);
+    }
+
     $stmt->execute();
     $resultado = $stmt->get_result();
 }
-
 
 // Sin resultado o error
 else {
