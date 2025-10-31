@@ -48,7 +48,7 @@ if ($result->num_rows > 0) {
     if ($row['tipo'] === 'seguir') {
       $link = 'perfil.php?id=' . $row['idUsuarioAccion'];
     } elseif (in_array($row['tipo'], ['like', 'comentario', 'album_nuevo']) && !empty($row['idReferencia'])) {
-      $link = 'ver_album.php?id=' . $row['idReferencia'];
+      $link = 'detalleAlbum.php?id=' . $row['idReferencia'];
     }
 
     echo '
