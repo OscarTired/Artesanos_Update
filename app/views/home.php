@@ -33,37 +33,49 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
 <body>
   <?php include 'nav.php'; ?>
   <div class="container mt-4">
-    <div class="row g-5">
-      <?php
-      if (!empty($albumes) && count($albumes) > 0) { //si hay albumes los muestra
-        foreach ($albumes as $a) {
-          
-          echo '<div class="col-12 col-sm-6 col-md-4 col-lg-3 album-item">
-              
-              <a href="" class="abrir-modal-album" data-id="' . $a->idAlbum . '" data-bs-toggle="modal" data-bs-target="#modalDetalleAlbum" style="text-decoration: none; color: inherit;">
-              <div class="card-body">
+    <div class="row row-cols-2 row-cols-md-4 g-5">
 
-              <img class="card-img-top " style="border-radius: 10px; height: 200px; object-fit: cover;" src="../../public/uploads/portadas/' . $a->urlPortada . '"/>
+<?php
+  if (!empty($albumes) && count($albumes) > 0) {
+    foreach ($albumes as $a) {
+      // Si no tenés idImagenPortada en $a, usamos idAlbum como fallback
+      $idImagenPortada = isset($a->idImagenPortada) ? (int)$a->idImagenPortada : (int)$a->idAlbum;
+      $urlPortada = htmlspecialchars($a->urlPortada);
+      $tituloAlbum = htmlspecialchars($a->tituloAlbum);
+      $apodoUsuario = htmlspecialchars($a->apodoUsuario);
+      $arrobaUsuario = htmlspecialchars($a->arrobaUsuario);
 
-              <div class="d-flex justify-content-between align-items-center">
-              <h5 class="card-title mb-0">' . $a->tituloAlbum . '</h5>
+      echo '<div class="col album-item">
+              <a href="#" class="abrir-modal-album" data-id="' . (int)$a->idAlbum . '" data-bs-toggle="modal" data-bs-target="#modalDetalleAlbum" style="text-decoration: none; color: inherit;">
+                <div class="card-body">
+                  <img class="card-img-top" style="border-radius: 10px; height: 200px; object-fit: cover;" src="../../public/uploads/portadas/' . $urlPortada . '"/>
+                  <div class="d-flex justify-content-between align-items-center mt-2">
+                    <h5 class="card-title mb-0">' . $tituloAlbum . '</h5>
+                  </div>
+                  <p class="card-text mb-0">' . $apodoUsuario . ' - @' . $arrobaUsuario . '</p>
+                </div>
               </a>
-              <div class="d-flex gap-2">
-              <img src="../../public/assets/images/like.png" alt="Me gusta" class="img-fluid me-4 me-sm-1" style="max-height: 25px; cursor: pointer; margin-top: 5px">
-              <img src="../../public/assets/images/comentario.png" alt="Comentario" class="img-fluid me-4 me-sm-1" style="max-height: 23px; cursor: pointer; margin-top: 5px">
-              </div>
+              <div class="d-flex gap-1 align-items-center mt-1">
+                <img src="../../public/assets/images/like.png"
+                     alt="Me gusta"
+                     class="img-fluid btn-like-galeria"
+                     data-idimagen="' . $idImagenPortada . '"
+                     style="max-height: 25px; cursor: pointer;">
+                <span id="likes-count-album-' . $idImagenPortada . '" class="text-muted small align-self-center">0</span>
 
+                <img src="../../public/assets/images/comentario.png"
+                     alt="Comentario"
+                     class="img-fluid"
+                     style="max-height: 23px; cursor: pointer;">
               </div>
-              <p class="card-text">' . $a->apodoUsuario . ' - @' . $a->arrobaUsuario . '</p> 
-              </div>
-
-              </div>';
-        }
+            </div>';
+    }
+  }
         if ($idUsuario != 0) { //si el usuario esta logueado muestra el boton de cargar mas
           echo '  <div class="text-center mt-4">
           <button id="loadMore" class="btn btn-primary">Mostrar más</button>
           </div>';
-        }
+        
       } else {
         echo '<p class="text-center">Aún no hay álbumes disponibles.<br>¡Sé el primero en publicar!';
       }
@@ -71,36 +83,34 @@ $albumes = $albumes->mostrarAlbumes($idUsuario); //recuperar los albumes de la b
     </div>
   </div>
   <!-- detalle de album-->
-  <div class="modal fade" id="modalDetalleAlbum" tabindex="-1" aria-labelledby="modalDetalleAlbumLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-      <div class="modal-content p-4">
-        <div class="modal-header d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center gap-3">
-            <img id="modalFotoPerfil" src="" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
-            <h5 class="modal-title mb-0" id="modalDetalleAlbumLabel">Nombre del usuario</h5>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <button id="btnSeguir" class="btn btn-outline-primary btn-sm">Seguir</button>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          </div>
+<div class="modal fade" id="modalDetalleAlbum" tabindex="-1" aria-labelledby="modalDetalleAlbumLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content p-4">
+      <div class="modal-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+          <img id="modalFotoPerfil" src="" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+          <h5 class="modal-title mb-0" id="modalDetalleAlbumLabel">Nombre del usuario</h5>
         </div>
+        <div class="d-flex align-items-center gap-2">
+          <button id="btnSeguir" class="btn btn-outline-primary btn-sm">Seguir</button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+      </div>
 
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-9" id="detalleAlbumIzquierda">
+            <!-- acá va el carrusel de las imágenes -->
+          </div>
 
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-lg-9" id="detalleAlbumIzquierda">
-              <!--aca va el carrusel de las imagenes etc -->
-              en construccion
-            </div>
-
-            <div class="col-lg-3" id="detalleAlbumDerecha">
-              <!--aca va el perfil -->
-            </div>
+          <div class="col-lg-3" id="detalleAlbumDerecha">
+            <!-- acá va el perfil -->
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
 
   <?php if ($idUsuario == 0): include 'registro.php';

@@ -1,44 +1,42 @@
 <?php
+// Asegúrate de que tu modelo tenga una función llamada toggleLike($idImagen, $idUsuario)
+include '../models/imagenModelo.php';
 session_start();
-require_once '../../config/conexion.php';
-$conexion = abrirConexion();
 
-$idUsuarioLike = $_SESSION['usuario']['id'];
-$idImagen = $_POST['idImagen'];
+header('Content-Type: application/json');
 
-// Insertar el "me gusta"
-$sql = "INSERT INTO megusta (idImagenLike, idUsuarioLike, fechaLike)
-        VALUES (?, ?, NOW())";
-$stmt = $conexion->prepare($sql);
-$stmt->bind_param("ii", $idImagen, $idUsuarioLike);
-$stmt->execute();
-
-// Obtener el dueño del álbum al que pertenece la imagen
-$sqlAutor = "SELECT a.idUsuarioAlbum, a.tituloAlbum
-             FROM album a
-             JOIN imagen i ON i.idAlbumImagen = a.idAlbum
-             WHERE i.idImagen = ?";
-$stmt2 = $conexion->prepare($sqlAutor);
-$stmt2->bind_param("i", $idImagen);
-$stmt2->execute();
-$result = $stmt2->get_result();
-$row = $result->fetch_assoc();
-
-if ($row) {
-    $idUsuarioDestino = $row['idUsuarioAlbum'];
-    $tituloAlbum = $row['tituloAlbum'];
-
-    if ($idUsuarioDestino != $idUsuarioLike) { // no notificar si es su propio álbum
-        $mensaje = "le dio me gusta a tu álbum '$tituloAlbum'";
-        $tipo = "like";
-
-        $sqlNotif = "INSERT INTO notificaciones (idUsuarioDestino, idUsuarioAccion, tipo, idReferencia, mensaje, leida, fecha)
-                     VALUES (?, ?, ?, ?, ?, 0, NOW())";
-        $stmt3 = $conexion->prepare($sqlNotif);
-        $stmt3->bind_param("iisis", $idUsuarioDestino, $idUsuarioLike, $tipo, $idImagen, $mensaje);
-        $stmt3->execute();
-    }
+if (!isset($_SESSION['usuario']['id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Usuario no autenticado']);
+    exit;
 }
 
-cerrarConexion($conexion);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Método no permitido']);
+    exit;
+}
+
+$idUsuario = (int)$_SESSION['usuario']['id'];
+$idImagen = filter_input(INPUT_POST, 'idImagen', FILTER_VALIDATE_INT);
+
+if (!$idImagen) {
+    http_response_code(400);
+    echo json_encode(['error' => 'ID de imagen inválido']);
+    exit;
+}
+
+try {
+    $modeloImagen = new ImagenModelo(); // Ajusta si tu clase tiene otro nombre
+    
+    // Asume que toggleLike() devuelve un array con:
+    // ['accion' => 'like'/'dislike', 'totalLikes' => 5]
+    $resultado = $modeloImagen->toggleLike($idImagen, $idUsuario);
+
+    echo json_encode($resultado);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Error al procesar el like: ' . $e->getMessage()]);
+}
 ?>

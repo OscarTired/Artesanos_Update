@@ -51,6 +51,27 @@ if (!$usuario || !isset($usuario['idUsuario'])) {
     exit;
 }
 
+if (isset($_GET['ajax'])) {
+    ob_start();
+    include 'detalleAlbumIzquierda.php'; // o el bloque HTML que muestra las fotos
+    $izquierda = ob_get_clean();
+
+    ob_start();
+    include 'detalleAlbumDerecha.php'; // o el bloque que muestra descripción, usuario, etc.
+    $derecha = ob_get_clean();
+
+    $response = [
+        'izquierda' => $izquierda,
+        'derecha' => $derecha,
+        'fotoPerfil' => $fotoPerfil ?? '',
+        'nombreUsuario' => $nombreUsuario ?? ''
+    ];
+
+    echo json_encode($response);
+    exit;
+}
+
+
 // Contadores
 $cantAlbumes = $modeloAlbum->contarAlbumesDeUsuario($usuario['idUsuario']);
 $cantSeguidores = $modeloAlbum->contarSeguidoresDeUsuario($usuario['idUsuario']);
@@ -94,13 +115,27 @@ $htmlIzquierda .= '
 <p id="descripcionImagen" class="text-muted"></p>';
 
 // Iconos de interacción
-$htmlIzquierda .= '<img src="../../public/assets/images/like.png" alt="Me gusta" class="img-fluid me-4 me-sm-1" style="max-height: 30px; cursor: pointer; margin-top: 5px; padding-bottom: 6px;">
-<p class="d-inline-block textoIcon">Me gusta</p>
-<a href="#formularioComentario">
-  <img src="../../public/assets/images/comentario.png" alt="Comentario" class="img-fluid me-4 me-sm-1" style="max-height: 27px; cursor: pointer; margin-top: 5px; padding-bottom: 5px;">
-  <p class="d-inline-block textoIcon">Comentarios</p>
-</a>';
+$htmlIzquierda .= '
+<div class="d-flex align-items-center mb-3 gap-2">
+    <img src="../../public/assets/images/like.png" 
+        alt="Me gusta" 
+        id="btn-like-imagen" 
+        data-idimagen="' . ($imagenes[0]['idImagen'] ?? 0) . '"
+        class="img-fluid" 
+        style="max-height: 30px; cursor: pointer;">
+    
+    <span id="likes-count-display" class="text-muted small align-self-center me-3">0</span>
 
+    <a href="#formularioComentario" class="d-flex align-items-center text-decoration-none text-dark">
+        <img src="../../public/assets/images/comentario.png" 
+            alt="Comentario" 
+            class="img-fluid" 
+            style="max-height: 27px; cursor: pointer;">
+        <span class="ms-1 small">Comentarios</span>
+    </a>
+</div>';
+
+// Nota: Ahora los elementos de interacción están dentro de un div flex para mejor alineación.
 // Comentarios
 $comentariosPorImagen = [];
 foreach ($imagenes as $img) {
@@ -117,7 +152,7 @@ if ($idUsuario == 0) {
       <div class="flex-grow-1">
         <div class="d-flex">
           <input type="text" id="inputComentario" class="form-control mb-3" placeholder="¿Agregar comentario?" maxlength="200" style="resize: none; height: 50px;">
-          <button id="btnEnviarComentario" class="btn btn-link">
+          <button id="btnEnviarComentario" class="btn btn-link" data-idimagen="' . ($imagenes[0]['idImagen'] ?? 0) . '">
             <i class="bi bi-arrow-right-circle" style="font-size: 1.5rem; color: #4B944B;"></i>
           </button>
         </div>

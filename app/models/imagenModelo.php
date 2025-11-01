@@ -60,4 +60,82 @@ class ImagenModelo
             return false;
         }
     }
+    // ... después de la llave de cierre de mostrarPorAlbum()...
+
+    /**
+     * Alterna (da/quita) un 'Me Gusta' y devuelve el nuevo conteo.
+     * @param int $idImagen El ID de la imagen que recibe el Like.
+     * @param int $idUsuario El ID del usuario que da el Like.
+     * @return array Un array con 'accion' (like/dislike) y 'totalLikes'.
+     */
+    public function toggleLike(int $idImagen, int $idUsuario): array
+    {
+        $conexion = abrirConexion();
+        
+        // Sanear las entradas
+        $idImagen = (int)$idImagen;
+        $idUsuario = (int)$idUsuario;
+
+        // 1. Verificar si el usuario ya dio like
+        $consultaVerificar = "SELECT idLike FROM megusta WHERE idImagenLike = $idImagen AND idUsuarioLike = $idUsuario;";
+        $resultadoVerificar = mysqli_query($conexion, $consultaVerificar);
+
+        if (mysqli_num_rows($resultadoVerificar) > 0) {
+            // Ya existe un like: quitarlo (DISLIKE)
+            $consultaAccion = "DELETE FROM megusta WHERE idImagenLike = $idImagen AND idUsuarioLike = $idUsuario;";
+            $accion = 'dislike';
+        } else {
+            // No existe un like: agregarlo (LIKE)
+            $fecha = date("Y-m-d H:i:s");
+            $consultaAccion = "INSERT INTO megusta (idImagenLike, idUsuarioLike, fechaLike) VALUES ($idImagen, $idUsuario, '$fecha');";
+            $accion = 'like';
+        }
+
+        $resultadoAccion = mysqli_query($conexion, $consultaAccion);
+
+        if (!$resultadoAccion) {
+             // Si la acción falla, lanzamos una excepción o devolvemos un error
+             cerrarConexion($conexion);
+             throw new Exception("Error al procesar el like en la BD: " . mysqli_error($conexion));
+        }
+
+        // 2. Obtener el nuevo conteo de likes
+        $totalLikes = $this->contarLikes($idImagen, $conexion); 
+
+        // 3. Cerrar conexión y devolver resultado
+        cerrarConexion($conexion);
+        return ['accion' => $accion, 'totalLikes' => $totalLikes];
+    }
+
+    /**
+     * Cuenta el número de 'Me Gusta' para una imagen específica.
+     * @param int $idImagen El ID de la imagen.
+     * @param object|null $conexion Conexión abierta (opcional, para uso interno).
+     * @return int El número total de likes.
+     */
+    public function contarLikes(int $idImagen, $conexion = null): int
+    {
+        $cerrar = false;
+        if ($conexion === null) {
+            $conexion = abrirConexion();
+            $cerrar = true;
+        }
+
+        $idImagen = (int)$idImagen;
+        
+        $consulta = "SELECT COUNT(*) as total FROM megusta WHERE idImagenLike = $idImagen;";
+        $resultado = mysqli_query($conexion, $consulta);
+        
+        $total = 0;
+        if ($resultado && $fila = mysqli_fetch_assoc($resultado)) {
+            $total = (int)$fila['total'];
+        }
+
+        if ($cerrar) {
+            cerrarConexion($conexion);
+        }
+        
+        return $total;
+    }
 }
+

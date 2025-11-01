@@ -90,12 +90,15 @@ class AlbumModelo
         $conexion = abrirConexion();
 
         $consulta = "SELECT a.idAlbum, a.tituloAlbum, a.esPublicoAlbum, a.urlPortadaAlbum,
-         u.idUsuario, u.apodoUsuario, u.arrobaUsuario
-         FROM album a
-         JOIN usuario u ON a.idUsuarioAlbum = u.idUsuario
-         LEFT JOIN seguimiento s ON s.idSeguido = u.idUsuario
-         WHERE a.esPublicoAlbum = 1
-         OR (s.idSeguidor = $idUsuarioActual AND s.estadoSeguimiento = 'seguido')";
+                    u.idUsuario, u.apodoUsuario, u.arrobaUsuario,
+                    i.idImagen AS idImagenPortada
+             FROM album a
+             JOIN usuario u ON a.idUsuarioAlbum = u.idUsuario
+             LEFT JOIN imagen i ON i.idAlbumImagen = a.idAlbum
+             LEFT JOIN seguimiento s ON s.idSeguido = u.idUsuario
+             WHERE a.esPublicoAlbum = 1
+             OR (s.idSeguidor = $idUsuarioActual AND s.estadoSeguimiento = 'seguido')
+             GROUP BY a.idAlbum";
 
         $resultado = mysqli_query($conexion, $consulta);
         $nfilas = mysqli_num_rows($resultado);

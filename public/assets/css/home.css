@@ -100,3 +100,6 @@
   word-break: break-word;
   white-space: pre-wrap;
 }
+#loadMore {
+  display: none !important;
+}
