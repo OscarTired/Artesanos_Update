@@ -215,6 +215,40 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", () => dropdown.style.display = "none");
 });
 </script>
+<script>
+// Manejo de botones Aceptar / Rechazar
+document.addEventListener("DOMContentLoaded", () => {
+  const contenedor = document.getElementById('contenedorNotificaciones');
+  if (!contenedor) return;
+
+  contenedor.addEventListener('click', (e) => {
+    const btn = e.target.closest('.aceptar-seguimiento, .rechazar-seguimiento');
+    if (!btn) return;
+
+    const idSeguidor = btn.getAttribute('data-idSeguidor');
+    const accion = btn.classList.contains('aceptar-seguimiento') ? 'aceptar' : 'rechazar';
+
+    fetch('responderSolicitud.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `idSeguidor=${idSeguidor}&accion=${accion}`
+    })
+    .then(res => res.text())
+    .then(data => {
+      if (data.trim() === 'activo' || data.trim() === 'rechazado') {
+        // eliminar la notificación del DOM
+        btn.closest('.list-group-item').remove();
+        // actualizar numerito después de aceptar/rechazar
+        setTimeout(actualizarNotificaciones, 500);
+      } else {
+        console.error('Error al responder solicitud:', data);
+      }
+    })
+    .catch(err => console.error(err));
+  });
+});
+</script>
+
 
 
 

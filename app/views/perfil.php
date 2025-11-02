@@ -120,19 +120,23 @@ if ($followersStmt) {
 }
 
 // Estado de seguimiento (si corresponde)
-$isFollowing = false;
+$followStatus = null; // puede ser 'pendiente', 'activo' o null
 if (!$isOwner && isset($_SESSION['usuario']['id'])) {
     $currentUserId = (int)$_SESSION['usuario']['id'];
-    $sqlIsFollowing = "SELECT 1 FROM seguimiento WHERE idSeguidor = ? AND idSeguido = ? LIMIT 1";
-    $isFollowingStmt = $conexion->prepare($sqlIsFollowing);
-    if ($isFollowingStmt) {
-        $isFollowingStmt->bind_param("ii", $currentUserId, $perfilId);
-        $isFollowingStmt->execute();
-        $resultIsFollowing = $isFollowingStmt->get_result();
-        $isFollowing = $resultIsFollowing->num_rows > 0;
-        $isFollowingStmt->close();
+    $sqlStatus = "SELECT estadoSeguimiento FROM seguimiento WHERE idSeguidor = ? AND idSeguido = ? LIMIT 1";
+    $stmtStatus = $conexion->prepare($sqlStatus);
+    if ($stmtStatus) {
+        $stmtStatus->bind_param("ii", $currentUserId, $perfilId);
+        $stmtStatus->execute();
+        $resultStatus = $stmtStatus->get_result();
+        if ($rowStatus = $resultStatus->fetch_assoc()) {
+            $followStatus = $rowStatus['estadoSeguimiento'];
+        }
+        $stmtStatus->close();
     }
 }
+
+
 
 $conexion->close();
 ?>
@@ -438,12 +442,24 @@ $conexion->close();
                             </form>
                         <?php elseif (isset($_SESSION['usuario']['id'])): ?>
                             <?php
-                            $followBtnClass = $isFollowing ? 'btn-success-full' : 'btn-orange-full';
-                            $followBtnText = $isFollowing ? '<i class="bi bi-check2 me-2"></i> Siguiendo' : '<i class="bi bi-person-plus me-2"></i> Seguir';
+                                                       
+                                if ($followStatus === 'pendiente') {
+                                $followBtnClass = 'btn-secondary';
+                                $followBtnText = '<i class="bi bi-hourglass-split me-2"></i> Pendiente';
+                            } elseif ($followStatus === 'activo') {
+                                $followBtnClass = 'btn-success-full';
+                                $followBtnText = '<i class="bi bi-check2 me-2"></i> Siguiendo';
+                            } else {
+                                $followBtnClass = 'btn-orange-full';
+                                $followBtnText = '<i class="bi bi-person-plus me-2"></i> Seguir';
+                            }
+
                             ?>
-                            <button id="follow-btn" class="btn <?= $followBtnClass ?> d-flex align-items-center justify-content-center">
-                                <?= $followBtnText ?>
+                            <button id="follow-btn" class="btn <?= $followBtnClass ?> d-flex align-items-center justify-content-center" data-id-seguido="<?= $perfilId ?>">
+                            <?= $followBtnText ?>
                             </button>
+
+
                         <?php else: ?>
                             <a href="login.php" class="btn btn-orange-full d-flex align-items-center justify-content-center">
                                 <i class="bi bi-person-plus me-2"></i> Seguir
@@ -595,6 +611,187 @@ $conexion->close();
         }
       })();
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* =====================================================
+     🟠 1. ACEPTAR / RECHAZAR SOLICITUD DE SEGUIMIENTO
+  ====================================================== */
+  document.querySelectorAll('.aceptar-seguimiento, .rechazar-seguimiento').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idSeguidor = this.dataset.id || this.dataset.idseguidor || this.dataset.idSeguidor;
+      const accion = this.classList.contains('aceptar-seguimiento') ? 'aceptar' : 'rechazar';
+
+      if (!idSeguidor) {
+        alert('Error interno: faltan datos. Reintentá.');
+        return;
+      }
+
+      fetch('responderSolicitud.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `idSeguidor=${encodeURIComponent(idSeguidor)}&accion=${encodeURIComponent(accion)}`
+      })
+      .then(res => res.text())
+      .then(data => {
+        data = data.trim();
+        const followBtn = document.querySelector('#follow-btn');
+
+        if (data === 'aceptado' && followBtn) {
+          followBtn.classList.remove('btn-secondary', 'btn-orange-full');
+          followBtn.classList.add('btn-success-full');
+          followBtn.innerHTML = '<i class="bi bi-check2 me-2"></i> Siguiendo';
+          alert("✅ Has aceptado la solicitud. Ahora ambos se siguen.");
+        } else if (data === 'rechazado' && followBtn) {
+          followBtn.classList.remove('btn-secondary', 'btn-success-full');
+          followBtn.classList.add('btn-orange-full');
+          followBtn.innerHTML = '<i class="bi bi-person-plus me-2"></i> Seguir';
+          alert("❌ Has rechazado la solicitud de seguimiento.");
+        } else {
+          alert('Ocurrió un error: ' + data);
+        }
+
+        // Eliminar la notificación
+        const card = this.closest('.notificacion-card, .list-group-item');
+        if (card) card.remove();
+      })
+      .catch(err => {
+        console.error(err);
+        alert("⚠️ Error de red. Intenta nuevamente.");
+      });
+    });
+  });
+
+  /* =====================================================
+     🟢 2. BOTÓN SEGUIR / DEJAR DE SEGUIR
+  ====================================================== */
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('#follow-btn');
+    if (!btn) return;
+
+    const idSeguido = btn.dataset.idSeguido || btn.dataset.idseguido || btn.dataset.id;
+    if (!idSeguido) return;
+
+    const actualizarBoton = (estado) => {
+      btn.classList.remove('btn-orange-full', 'btn-success-full', 'btn-secondary');
+      switch (estado) {
+        case 'siguiendo':
+          btn.classList.add('btn-success-full');
+          btn.innerHTML = '<i class="bi bi-check2 me-2"></i> Siguiendo';
+          break;
+        case 'pendiente':
+          btn.classList.add('btn-secondary');
+          btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> Pendiente';
+          break;
+        default:
+          btn.classList.add('btn-orange-full');
+          btn.innerHTML = '<i class="bi bi-person-plus me-2"></i> Seguir';
+      }
+    };
+
+    // Si ya sigue o está pendiente → dejar de seguir
+    if (btn.classList.contains('btn-success-full') || btn.classList.contains('btn-secondary')) {
+      fetch('dejarSeguir.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `idSeguido=${encodeURIComponent(idSeguido)}`
+      })
+      .then(res => res.text())
+      .then(data => {
+        if (data.trim() === 'ok') {
+          actualizarBoton('ninguno');
+          btn.dataset.ignoreCheck = "1";
+          setTimeout(() => delete btn.dataset.ignoreCheck, 6000);
+        } else {
+          alert('Error al dejar de seguir: ' + data);
+        }
+      })
+      .catch(err => console.error(err));
+      return;
+    }
+
+    // Si no sigue → seguir
+    fetch('seguir.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `idSeguido=${encodeURIComponent(idSeguido)}`
+    })
+    .then(res => res.text())
+    .then(data => {
+      const estado = data.trim();
+      if (estado === 'pendiente' || estado === 'siguiendo') {
+        actualizarBoton(estado);
+      }
+    })
+    .catch(err => console.error(err));
+  });
+
+  /* =====================================================
+     🔵 3. POLLING: verificar estado del seguimiento cada 5s
+  ====================================================== */
+  setInterval(() => {
+    const btn = document.querySelector('#follow-btn');
+    if (!btn || btn.dataset.ignoreCheck) return;
+
+    const idSeguido = btn.dataset.idSeguido || btn.dataset.idseguido || btn.dataset.id;
+    if (!idSeguido) return;
+
+    fetch('checkFollowStatus.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `idSeguido=${encodeURIComponent(idSeguido)}`
+    })
+    .then(res => res.text())
+    .then(status => {
+      const estado = status.trim();
+      if (['activo','aceptado'].includes(estado)) actualizarBoton('siguiendo');
+      else if (estado === 'pendiente') actualizarBoton('pendiente');
+      else actualizarBoton('ninguno');
+    })
+    .catch(err => console.error(err));
+  }, 5000);
+
+  /* =====================================================
+     🔹 4. MODAL CARRUSEL
+  ====================================================== */
+  const modal = document.getElementById('modalDetalleAlbum');
+  if (modal) {
+    const actualizarInfoImagen = () => {
+      const carrusel = document.getElementById('carouselAlbum');
+      if (!carrusel) return;
+      const activo = carrusel.querySelector('.carousel-item.active');
+      if (!activo) return;
+
+      const tituloEl = document.getElementById('tituloImagen');
+      const descEl = document.getElementById('descripcionImagen');
+
+      if (tituloEl) tituloEl.textContent = activo.dataset.titulo || '';
+      if (descEl) descEl.textContent = activo.dataset.descripcion || '';
+    };
+
+    modal.addEventListener('shown.bs.modal', () => {
+      setTimeout(() => {
+        actualizarInfoImagen();
+
+        const carrusel = document.getElementById('carouselAlbum');
+        if (!carrusel) return;
+
+        carrusel.removeEventListener('slid.bs.carousel', actualizarInfoImagen);
+        carrusel.addEventListener('slid.bs.carousel', actualizarInfoImagen);
+
+        try { if (typeof bootstrap !== 'undefined') new bootstrap.Carousel(carrusel, { ride: false }); }
+        catch(e){ console.warn('No se pudo inicializar carousel:', e); }
+      }, 50);
+    });
+
+    modal.addEventListener('hidden.bs.modal', () => {
+      const carrusel = document.getElementById('carouselAlbum');
+      if (carrusel) carrusel.removeEventListener('slid.bs.carousel', actualizarInfoImagen);
+    });
+  }
+
+});
+</script>
 
 </body>
 
