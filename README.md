@@ -51,7 +51,3 @@ public/
 
 > [!NOTE]
 > El cálculo del tiempo relativo usa `Date.now()` del dispositivo, evitando desfases por zona horaria.
-
-## Contribución
-
-- Pull Requests bienvenidos. Usa `PR.md` para ver un resumen de cambios recientes y convenciones.
